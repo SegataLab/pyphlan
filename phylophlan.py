@@ -365,6 +365,18 @@ class PpaTree:
             cl2markers[k] = sorted(v,key=lambda x:float(x[2]),reverse=True)[:max_markers]
         return cl2markers.values()
 
+    def get_c2t( self ):
+        tc2t = {}
+
+        def _get_c2t_( clade ):
+            lterms = clade.get_terminals()
+            tc2t[clade] = set([l.name for l in lterms])
+            if clade.is_terminal():
+                return
+            for c in clade.clades:
+                _get_c2t_( c )
+        _get_c2t_( self.tree.root )
+        return tc2t 
 
     def ltcs( self, terminals, tc2t = None, terminals2clades = None, lca_precomputed = None ):
         set_terminals = set( terminals )
