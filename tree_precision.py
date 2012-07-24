@@ -9,9 +9,9 @@ except ImportError:
     sys.exit(-1)
 
 try:
-    import phylophlan as ppa
+    import pyphlan as ppa
 except ImportError:
-    sys.stderr.write( "phylophlan.py not found" )
+    sys.stderr.write( "pyphlan.py not found" )
     sys.exit(-1)
 
 def read_params( args ):
