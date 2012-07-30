@@ -14,10 +14,9 @@ import array as arr
 import collections as colls
 import scipy.stats as st
 import sys
-
 #core_test = lambda ok,tot,pr: 1.0-st.binom.sf(ok,tot,pr)
 
-
+lev_sep = "."
 
 # Here are three functions that I'd love to see in Biopython but they
 # are not there (yet).
