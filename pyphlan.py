@@ -618,7 +618,8 @@ class PpaTree:
             if last:
                 last.nc = c
             last = c
-        self._ord_terms[-1].nc = None # self._ord_terms[0]
+        c.nc = None
+        #self._ord_terms[-1].nc = None # self._ord_terms[0]
 
 
 
