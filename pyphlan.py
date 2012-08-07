@@ -298,7 +298,7 @@ class PpaTree:
             tgts = dict([(s,tgts_l.count(s)) for s in set(tgts_l)])
 
             if len(tgts) >= min_core_size:
-                ret[sid] = self._find_core( tgtsi, er = error_rate )
+                ret[sid] = self._find_core( tgts, er = error_rate )
         return ret
    
     def markerness( self, coreness, uniqueness, cn_min, cn_max, cn_avg ):

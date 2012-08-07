@@ -9,6 +9,7 @@ from collections import namedtuple as nt
 import random as rnd
 rnd.seed(1982)
 import utils
+from Bio import SeqIO
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='Split/Select/Randomize/Subsample a multi fasta file')
@@ -24,6 +25,9 @@ def read_params(args):
         default=None, type = float )
     parser.add_argument('--randomize', help='Randomize output order. Not very memory efficient right now!', action='store_true' )
     parser.add_argument('--split', metavar='nsplits', default=1, type = int )
+    
+    parser.add_argument('--min_len', metavar='Minimum length of the genes to keep', default=None, type = int )
+    parser.add_argument('--max_len', metavar='Maximum length of the genes to keep', default=None, type = int )
 
     parser.add_argument('--ids', metavar='s', default="", type=str, 
         help="the list of entries to select (separated by ::: if given as string otherwise as \\n if a file is given)")
@@ -42,8 +46,9 @@ class read:
         return str(self)
 
 class reader(object):
-    def __init__( self, fn ):
+    def __init__( self, fn, min_len = None, max_len = None ):
         self.ret = False
+        self.min_len, self.max_len = min_len, max_len
         #openr = bz2.BZ2File if bool(fn) and fn.endswith(".bz2") else open
         self.inp = utils.openr(fn) if bool(fn) else sys.stdin
         self.cr = read( )
@@ -55,14 +60,19 @@ class reader(object):
         while True:
             try:
                 l = self.inp.next().strip()
-                if l[0] == '>':
+                if l and l[0] == '>':
                     ret = None
                     if self.cr.n and len(self.cr.seq) > 0:
                         ret = read(self.cr.n,self.cr.seq)
                     self.cr.n = l[1:]# hash(l[1:])
                     self.cr.seq = ""
                     if ret:
-                        return ret
+                        if self.min_len and len(ret.seq) < self.min_len:
+                            pass
+                        elif self.max_len and len(ret.seq) > self.max_len:
+                            pass
+                        else:
+                            return ret
                 else:
                     self.cr.seq += l
             except StopIteration:
@@ -98,8 +108,25 @@ def sss( par ):
     nstreams = len( out_stream )
 
     p = par['subsample']
-    reads = reader( par['inp_f'] )
-    cind = 0 
+    #reads = reader( par['inp_f'], par['min_len'], par['max_len'] )
+    cind = 0
+    lmin,lmax = par['min_len'], par['max_len'] 
+    for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"):
+        if lmin and len(r.seq) < lmin:
+            continue
+        if lmax and len(r.seq) > lmax:
+            continue
+        if select and r.id not in es:
+            continue
+        if subsample and rnd.random() > p:
+            continue
+        if randomize:
+            all_reads.append( r )
+            continue
+        SeqIO.write(r, out_stream[cind], "fasta")
+        cind = (cind + 1) % nstreams
+    
+    """
     for r in reads:
         if select and r.n not in es:
             continue
@@ -110,12 +137,14 @@ def sss( par ):
             continue
         out_stream[cind].write(  str(r)  )
         cind = (cind + 1) % nstreams
-    
+    """
+
     if randomize:
         rnd.shuffle(all_reads)
         step = len(all_reads) / nstreams 
         for i,r in enumerate(all_reads):
-            out_stream[cind].write( str(r) )
+            #out_stream[cind].write( str(r) )
+            SeqIO(r, out_stream[cind], "fasta" )
             if not i % step:
                 cind = (cind + 1) % nstreams
 
