@@ -2,6 +2,7 @@
 
 import sys
 import collections
+import utils
 
 try:
     import argparse as ap
@@ -33,7 +34,7 @@ if __name__ == "__main__":
             elif type == 'S' and  query not in uc2cl:
                 uc2cl[query] = set()
 
-    openw = bz2.BZ2File if args['txt'].endswith(".bz2") else open
-    with (openw(args['txt'],"w") if args['txt'] else sys.stdout) as out:
+    #openw = bz2.BZ2File if args['txt'].endswith(".bz2") else open
+    with utils.openw(args['txt']) as out:
         for k,v in sorted(uc2cl.items(),key=lambda x:-len(x[1])):
             out.write( "\t".join([k]+list(v)) +"\n" )

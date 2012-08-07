@@ -12,7 +12,7 @@ rpi2 = 2.0*rpi
 import numpy as np 
 import array as arr
 import collections as colls
-import scipy.stats as st
+#import scipy.stats as st
 import sys
 #core_test = lambda ok,tot,pr: 1.0-st.binom.sf(ok,tot,pr)
 
@@ -113,10 +113,11 @@ def reroot_mid_fat_edge( tree, node ):
         tree.root.clades = [new_clade] + [c for c in tree.root.clades if c != node]
         reroot( tree, new_clade)
 
-def clades2terms( tree ):
+def clades2terms( tree, startswith = None ):
     c2t = {}
     def clades2terms_rec( c ):
-        c2t[c] = c.get_terminals()
+        if startswith and c.name and c.name.startswith( startswith ):
+            c2t[c] = c.get_terminals()
         for cc in c.clades:
             clades2terms_rec(cc)
     clades2terms_rec( tree.root )
