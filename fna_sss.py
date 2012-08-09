@@ -28,6 +28,7 @@ def read_params(args):
     
     parser.add_argument('--min_len', metavar='Minimum length of the genes to keep', default=None, type = int )
     parser.add_argument('--max_len', metavar='Maximum length of the genes to keep', default=None, type = int )
+    parser.add_argument('--reverse', action='store_true', help="Invert selection\n")
 
     parser.add_argument('--ids', metavar='s', default="", type=str, 
         help="the list of entries to select (separated by ::: if given as string otherwise as \\n if a file is given)")
@@ -116,8 +117,12 @@ def sss( par ):
             continue
         if lmax and len(r.seq) > lmax:
             continue
-        if select and r.id not in es:
-            continue
+        if select:
+            if par['reverse']:
+                if r.id in es:
+                    continue
+            elif r.id not in es:
+                continue
         if subsample and rnd.random() > p:
             continue
         if randomize:
