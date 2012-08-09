@@ -38,7 +38,6 @@ if __name__ == "__main__":
     tbl = ppatree.tree.total_branch_length()-1.0 if args['n'] else 1.0
 
     with utils.openw( args['out_file'] ) as out:
-        print out
         for k1,v1 in dists.items():
             for k2,v2 in v1.items():
                 if k1 < k2:
