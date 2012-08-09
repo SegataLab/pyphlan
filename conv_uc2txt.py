@@ -27,7 +27,8 @@ if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
 
-    with (open(args['uc']) if args['uc'] else sys.stdin) as inp:
+    #with (open(args['uc']) if args['uc'] else sys.stdin) as inp:
+    with utils.openr(args['uc']) as inp:
         for type,cln,seql,pid,strand,ing1,ign2,aln,query,target in (l.split('\t') for l in inp):
             if type == 'H':
                 uc2cl[target.strip()].add( query )
