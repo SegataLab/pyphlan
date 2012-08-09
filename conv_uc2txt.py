@@ -18,7 +18,7 @@ def read_params( args ):
     p.add_argument( 'uc', nargs='?', default=None, type=str,
             help=   "the input uc file [stdin if not present]")
     p.add_argument('txt', nargs='?', default=None, type=str,
-            help=   "the output txt file compresse if fiven with bz2 extension\n"
+            help=   "the output txt file compressed if fiven with bz2 extension\n"
                     "[stdout if not present]")
 
     return vars( p.parse_args() )
