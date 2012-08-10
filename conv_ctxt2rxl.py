@@ -2,7 +2,7 @@
 
 import sys
 import collections
-
+import utils
 try:
     import argparse as ap
     import bz2 
@@ -31,9 +31,10 @@ if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
 
-    openr = bz2.BZ2File if args['ctxt'] and args['ctxt'].endswith(".bz2") else open
+    #openr = bz2.BZ2File if args['ctxt'] and args['ctxt'].endswith(".bz2") else open
     valin = []
-    with (openr(args['ctxt']) if args['ctxt'] else sys.stdin) as inp:
+    #with (openr(args['ctxt']) if args['ctxt'] else sys.stdin) as inp:
+    with utils.openr( args['ctxt'] ) as inp:
         for l in inp:
             tset = set([int(a) for a in l.strip().split('\t')])
             if len(tset) < args['n']:
@@ -50,12 +51,12 @@ if __name__ == "__main__":
         #    continue
         res[t] = [int(t in v) for v in valin]
 
-    openw = bz2.BZ2File if args['txt'].endswith(".bz2") else open
-    with (openw(args['txt'],"w") if args['txt'] else sys.stdout) as out:
+    #openw = bz2.BZ2File if args['txt'].endswith(".bz2") else open
+    with utils.openw(args['txt']) as out:
         n = len(res.values()[0])
         n_s = int(float(n)*args['subsample'])
         out.write( str(len(res))+" "+str(n_s)+"\n" )
         indok = set(random.sample( list(range(n)), n_s))
 
         for k,v in res.items():
-            out.write( str(k)[1:]+" "*(9-len(str(k)[1:]))+"".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
+            out.write( str(k)[1:]+" "*(15-len(str(k)[1:]))+"".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
