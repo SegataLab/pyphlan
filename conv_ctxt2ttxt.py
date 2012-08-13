@@ -30,8 +30,6 @@ if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
 
-    #openr = bz2.BZ2File if args['ctxt'] and args['ctxt'].endswith(".bz2") else open
-    #with (openr(args['ctxt']) if args['ctxt'] else sys.stdin) as inp:
     with utils.openr( args['ctxt'] ) as inp:
         valin = [[int(a) for a in l.strip().split('\t')] for l in inp]
     if not args['g2t'] and not args['t2g']:
@@ -49,13 +47,9 @@ if __name__ == "__main__":
                 for g in ll[1:]:
                     g2t[int(g)] = int(ll[0])
     
-    #valout = [[g2t[k]]+[g2t[vv] for vv in v] for k,v in valin]
     for j,v in enumerate(valin):
-        #for i,vv in enumerate(v):
-        #    vn = set(g2t[vv] for vv in v)
-        valin[j] = set(g2t[vv] for vv in v)
+        valin[j] = [v[0]]+list(set(g2t[vv] for vv in v))
 
-    #openw = bz2.BZ2File if args['txt'] and args['txt'].endswith(".bz2") else open
     with utils.openw(args['txt']) as out:
         for v in sorted(valin,key=lambda x:-len(x)):
             out.write( "\t".join([str(s) for s in v]) +"\n" )

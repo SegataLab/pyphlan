@@ -12,7 +12,6 @@ rpi2 = 2.0*rpi
 import numpy as np 
 import array as arr
 import collections as colls
-#import scipy.stats as st
 import sys
 #core_test = lambda ok,tot,pr: 1.0-st.binom.sf(ok,tot,pr)
 
@@ -219,6 +218,7 @@ class PpaTree:
 
 
     def core_test( self, ok, tot, pr ):
+        import scipy.stats as st
         if pr in self.ctc and tot in self.ctc[pr] and ok in self.ctc[pr][tot]:
             return self.ctc[pr][tot][ok]
         ret = 1.0-st.binom.sf(ok,tot,pr)
@@ -281,7 +281,7 @@ class PpaTree:
         self.ctc = {}
         imgids2terminals = {}
         for t in self.tree.get_terminals():
-            t.imgid = int(t.name)
+            t.imgid = int(t.name[3:] if "t__"in t.name else t.name)
             t.nterminals = 1
             imgids2terminals[t.imgid] = t
 
@@ -300,6 +300,7 @@ class PpaTree:
 
             if len(tgts) >= min_core_size:
                 ret[sid] = self._find_core( tgts, er = error_rate )
+                #print sid #, ret[sid]
         return ret
    
     def markerness( self, coreness, uniqueness, cn_min, cn_max, cn_avg ):

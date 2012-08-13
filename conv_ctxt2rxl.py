@@ -24,6 +24,8 @@ def read_params( args ):
             default=1.0, type=float )
     p.add_argument('-n', metavar="Minimum number of matching taxa",
             default=0, type=int )
+    p.add_argument('-p', metavar="Prefix for taxon names",
+            default="", type=str )
 
     return vars( p.parse_args() )
 
@@ -36,7 +38,7 @@ if __name__ == "__main__":
     #with (openr(args['ctxt']) if args['ctxt'] else sys.stdin) as inp:
     with utils.openr( args['ctxt'] ) as inp:
         for l in inp:
-            tset = set([int(a) for a in l.strip().split('\t')])
+            tset = set([int(a) for a in l.strip().split('\t')][1:])
             if len(tset) < args['n']:
                 continue
             valin.append(tset)
@@ -59,4 +61,4 @@ if __name__ == "__main__":
         indok = set(random.sample( list(range(n)), n_s))
 
         for k,v in res.items():
-            out.write( str(k)[1:]+" "*(15-len(str(k)[1:]))+"".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
+            out.write( args['p'] + str(k)[1:]+" "*(15-len(str(k)[1:]))+"".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )

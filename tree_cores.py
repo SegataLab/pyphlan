@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import utils 
 
 try:
     import argparse as ap
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     tree = ppa.PpaTree( args['intree'] )
     cores = tree.find_cores(args['f'])
 
-    with open( args['outfile'], "w" ) as outf:
+    with utils.openw( args['outfile'] ) as outf:
         for k,v in sorted(cores.items(),key=lambda x:x[0]):
             for vv in v:
                 outf.write( "\t".join( [str(s) for s in [k]+list(vv)]) +"\n" )
