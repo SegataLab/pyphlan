@@ -115,7 +115,10 @@ def reroot_mid_fat_edge( tree, node ):
 def clades2terms( tree, startswith = None ):
     c2t = {}
     def clades2terms_rec( c ):
-        if startswith and c.name and c.name.startswith( startswith ):
+        if startswith: 
+            if c.name and c.name.startswith( startswith ):
+                c2t[c] = c.get_terminals()
+        else:
             c2t[c] = c.get_terminals()
         for cc in c.clades:
             clades2terms_rec(cc)
@@ -396,11 +399,9 @@ class PpaTree:
                 r,tmax = _ltcs_rec_( c, cur_max )
                 if tmax >= cur_max:
                     cur_max = tmax
-                #print r
                     if r:
                         rets.append((r,tmax))
             if rets:
-                #print sorted(rets,key=lambda x:len(x.get_terminals()))[-1]
                 return sorted(rets,key=lambda x:x[1])[-1][0],cur_max
             else:
                 return None,None 
