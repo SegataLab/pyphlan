@@ -221,6 +221,7 @@ class PpaTree:
 
 
     def core_test( self, ok, tot, pr ):
+        # scipy included here for non-compatibility with scons
         import scipy.stats as st
         if pr in self.ctc and tot in self.ctc[pr] and ok in self.ctc[pr][tot]:
             return self.ctc[pr][tot][ok]
