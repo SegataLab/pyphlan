@@ -26,6 +26,10 @@ def read_params( args ):
             help=   "the output core file [stdout if not present]")
     p.add_argument('-f', metavar="File containing sets of taxa",
             default=None, type=str )
+    p.add_argument('-e', metavar="Error rate [def 0.95]",
+            default=0.95, type=float )
+    p.add_argument('-s', metavar="Subtree of interest",
+            default=None, type=str )
 
     return vars( p.parse_args() )
 
@@ -33,7 +37,7 @@ def read_params( args ):
 if __name__ == "__main__":
     args = read_params( sys.argv )
     tree = ppa.PpaTree( args['intree'] )
-    cores = tree.find_cores(args['f'])
+    cores = tree.find_cores(args['f'], error_rate = args['e'], subtree = args['s'])
 
     with utils.openw( args['outfile'] ) as outf:
         for k,v in sorted(cores.items(),key=lambda x:x[0]):
