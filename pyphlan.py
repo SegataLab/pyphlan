@@ -235,35 +235,47 @@ class PpaTree:
         intersection = clade.imgids & targs
         core = self.core_test( len(intersection), clade.nterminals, er )
         if core < 0.05 or len(intersection) == 0:
-            return False, core 
-        for subclade in clade.get_nonterminals():
+            return False, core, None
+        nsubclades, nsubclades_absent = 0, 0
+        for subclade in set(clade.get_nonterminals()) - set([clade]):
+            nsubclades += 1
             if subclade.nterminals == 1:
+                if len(subclade.imgids & targs) == 0:
+                    nsubclades_absent += 1
                 continue
             subcore = self.core_test( len(subclade.imgids & targs), subclade.nterminals, er )    
             if subcore < 0.05:
-                return False, core
-        return True, core
+                return False, core, None
+        if nsubclades == nsubclades_absent + 1:
+            return False, core, None
+        return True, core, intersection
 
-    def _find_core( self, terminals, er = 0.95 ):
-        terminals_s = set(terminals)
+    def _find_core( self, terminals, er = 0.95, root_name = None ):
+        #terminals_s = set(terminals)
         def _find_core_rec( clade ):
+            clname = lev_sep.join( [root_name,clade.full_name ]) if root_name else clade.full_name
             if clade.is_terminal():
                 if clade.imgid in terminals:
-                    n = terminals[clade.imgid]
-                    return [(clade.full_name,1,1,n,n,n,1.0)]
+                    #n = terminals[clade.imgid]
+                    return [(clname,1,1,
+                                #n,n,n,
+                                1.0)]
                 return []
             if len(clade.imgids) == 1:
                 cimg = list(clade.imgids)[0]
-                if cimg in terminals_s:
-                    n = terminals[cimg]
-                    return [(clade.full_name,1,1,n,n,n,1.0)]
+                if cimg in terminals:
+                    #n = terminals[cimg]
+                    return [(clname,1,1,
+                                #n,n,n,
+                                1.0)]
                 return []
-            core,pv = self.is_core( clade, terminals_s, er = er )
+            core,pv,intersection = self.is_core( clade, terminals, er = er )
             if core:
-                ns = [terminals[ii] for ii in terminals_s if ii in clade.imgids]
-                return [( clade.full_name,
-                          len(clade.imgids&terminals_s),len(clade.imgids),
-                          min(ns),max(ns),np.mean(ns),
+                #ns = [terminals[ii] for ii in terminals_s if ii in clade.imgids]
+                return [( clname,
+                          len(intersection),len(clade.imgids),
+                          #len(clade.imgids&terminals_s),len(clade.imgids),
+                          #min(ns),max(ns),np.mean(ns),
                           pv)]
             rets = []
             for c in clade.clades:
@@ -281,7 +293,9 @@ class PpaTree:
                 _add_full_paths_( c, lpath )
         _add_full_paths_( self.tree.root, [] )
 
-    def find_cores( self, cl_taxa_file, min_core_size = 1, error_rate = 0.95 ):
+    def find_cores( self, cl_taxa_file, min_core_size = 1, error_rate = 0.95, subtree = None ):
+        if subtree:
+            self.subtree( 'name', subtree ) 
         self.ctc = {}
         imgids2terminals = {}
         for t in self.tree.get_terminals():
@@ -294,16 +308,17 @@ class PpaTree:
             n.imgids = set( [nn.imgid for nn in n.get_terminals()]  )
             n.nterminals = len( n.imgids )
 
-        self.add_full_paths() 
+        self.add_full_paths() # unnecessary 
 
         ret = {}
         for vec in (l.strip().split('\t') for l in open(cl_taxa_file)):
             sid = int(vec[0])
-            tgts_l = [int(s) for s in vec[1:]]
-            tgts = dict([(s,tgts_l.count(s)) for s in set(tgts_l)])
+            #tgts_l = [int(s) for s in vec[1:]]
+            #tgts = dict([(s,tgts_l.count(s)) for s in set(tgts_l)])
+            tgts = set([int(s) for s in vec[1:]])
 
             if len(tgts) >= min_core_size:
-                ret[sid] = self._find_core( tgts, er = error_rate )
+                ret[sid] = self._find_core( tgts, er = error_rate, root_name = subtree )
                 #print sid #, ret[sid]
         return ret
    
@@ -325,7 +340,7 @@ class PpaTree:
             n.imgids = set( [nn.imgid for nn in n.get_terminals()]  )
             n.nterminals = len( n.imgids )
 
-        self.add_full_paths() 
+        self.add_full_paths() # unnecessary 
         
         cus = dict([(int(l[0]),[int(ll) for ll in l[1:]]) for l in 
                         (line.strip().split('\t') for line in open(cu_file))])
@@ -516,9 +531,15 @@ class PpaTree:
         newroot = None
         if strategy == 'name':
             ct = list(self.tree.find_clades( {"name": n} ))
-            if len( ct ) > 1:
-                sys.stderr.write( "Error: non-unique target specified." )
-                sys.exit(-1)
+            if len( ct ) != 1:
+                int_clades = self.tree.get_nonterminals()
+                for cl in int_clades:
+                    if n == cl.full_name:
+                        ct = [cl]
+                        break
+                if not ct:
+                    sys.stderr.write( "Error: target not found." )
+                    sys.exit(-1)
             newroot = ct[0]
         elif strategy == 'lca':
             terms = self.read_targets( fn ) if isinstance(fn,str) else fn
