@@ -34,7 +34,7 @@ if __name__ == "__main__":
         valin = [[int(a) for a in l.strip().split('\t')] for l in inp]
     if not args['g2t'] and not args['t2g']:
         sys.stdout.write("Error one of --t2g and --g2t must be provided\n")
-        sys.eit(0)
+        sys.exit(0)
     g2t = {}
 
 
