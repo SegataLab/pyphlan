@@ -238,15 +238,17 @@ class PpaTree:
             return False, core, None
         nsubclades, nsubclades_absent = 0, 0
         for subclade in set(clade.get_nonterminals()) - set([clade]):
-            nsubclades += 1
+            #nsubclades += 1 # !!!
             if subclade.nterminals == 1:
+                nsubclades += 1 # !!!
                 if len(subclade.imgids & targs) == 0:
                     nsubclades_absent += 1
                 continue
             subcore = self.core_test( len(subclade.imgids & targs), subclade.nterminals, er )    
             if subcore < 0.05:
                 return False, core, None
-        if nsubclades == nsubclades_absent + 1:
+        #if nsubclades == nsubclades_absent + 1: # !!!
+        if nsubclades > 0 and nsubclades == nsubclades_absent:
             return False, core, None
         return True, core, intersection
 
@@ -335,7 +337,7 @@ class PpaTree:
             imgids2terminals[t.imgid] = t
             ids2clades[t.name] = t
 
-        # can be made faster with recursion (but is is not a bottleneck)
+        # can be made faster with recursion (but it is not a bottleneck)
         for n in self.tree.get_nonterminals():
             n.imgids = set( [nn.imgid for nn in n.get_terminals()]  )
             n.nterminals = len( n.imgids )
