@@ -40,6 +40,6 @@ if __name__ == '__main__':
                 if len(gene) - i < rlen - step:
                     break
                 nid = "_".join([oid,str(i)])
-                reads.append( SeqRecord( gene[i:i+rlen], id = nid) )
+                reads.append( SeqRecord( gene[i:i+rlen], id = nid, description = "") )
 
             SeqIO.write(reads, outf, "fasta")

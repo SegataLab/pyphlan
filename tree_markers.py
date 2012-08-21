@@ -40,4 +40,6 @@ if __name__ == "__main__":
 
     with open( args['outfile'], "w" ) as outf:
         for k,v in sorted(cores.items(),key=lambda x:x[0]):
+            if len(v) > 1:
+                continue
             outf.write( "\t".join( [str(k)] + [str(s) for s in v]) + "\n" )

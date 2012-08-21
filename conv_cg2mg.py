@@ -63,7 +63,21 @@ if __name__ == "__main__":
         n = float(n)
     
         with utils.openw(args['mtxt']) as out:
+            last,lastv = "",[]
+            outbuf = []
             for v in valin:
+                gt = int(v[0])
+                if last == gt:
+                    continue
+                if last:
+                    outbuf.append( lastv )
+                last = gt
+                lastv = v
+            if last != gt and last:
+                outbuf.append( lastv )
+
+
+            for v in outbuf:
                 fr = int(v[0])
                 frt = g2t[fr]
                 nu = len(g2c[fr])
