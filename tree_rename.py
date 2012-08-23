@@ -2,6 +2,7 @@
 
 import sys
 
+
 try:
     import argparse as ap
 except ImportError:
@@ -36,6 +37,12 @@ def read_params( args ):
 if __name__ == "__main__":
     args = read_params( sys.argv )
     ctree = ppa.PpaTree( args['intree'] )
-    ctree.rename( strategy = args['s'], n = args['n'], fn = args['f'] )
+    if args['s'] in ['lca','ltcs']:
+        with open( args['f'] ) as inp:
+            for l in inp:
+                line = l.strip().split('\t')
+                ctree.rename( strategy = args['s'], n = line[0], terms = line[1:]  )
+    else:
+        ctree.rename( strategy = args['s'], n = args['n'] )
     ctree.export( args['outtree'] )
 
