@@ -91,9 +91,9 @@ def sss( par ):
         n = par['split']
         #openw = bz2.BZ2File if par['out_f'].endswith(".bz2") else open
         if n == 1:
-            out_stream = [utils.openw( par['out_f'], "w")]
+            out_stream = [utils.openw( par['out_f'])]
         else:
-            out_stream = [utils.openw( par['out_f']+str(r).zfill(len(str(n)))+".fna"+(".bz2" if par['out_f'].endswith(".bz2") else ""), "w") for r in range(n)]
+            out_stream = [utils.openw( par['out_f']+str(r).zfill(len(str(n)))+".fna"+(".bz2" if par['out_f'].endswith(".bz2") else "")) for r in range(n)]
     else:
         out_stream = [sys.stdout] # larger buffer?
 
