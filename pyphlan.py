@@ -553,22 +553,21 @@ class PpaTree:
         if newroot:
             self.tree.root = newroot
 
-    def rename( self, strategy, n = None, fn = None ):
+    def rename( self, strategy, n = None, terms = None ):
         newroot = None
         if strategy == 'root_name':
             ct = list(self.tree.find_clades( {"name": n} ))
             if len( ct ) > 1:
-                sys.stderr.write( "Error: non-unique target specified." )
+                sys.stderr.write( "Error: non-unique target specified.\n" )
                 sys.exit(-1)
             newroot = ct[0]
         elif strategy == 'lca':
-            terms = self.read_targets( fn ) if isinstance(fn,str) else fn
             newroot = self.lca( terms )
         elif strategy == 'ltcs':
-            terms = self.read_targets( fn ) if isinstance(fn,str) else fn
             newroot = self.ltcs( terms )
         if newroot:
             newroot.name = n
+
     def export( self, out_file ):
         self.tree = self.tree.as_phyloxml()
         Phylo.write( self.tree, out_file, "phyloxml")
