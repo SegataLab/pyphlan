@@ -320,6 +320,7 @@ class PpaTree:
             tgts = set([int(s) for s in vec[1:]])
 
             if len(tgts) >= min_core_size:
+                subtree_name = lev_sep.join(subtree.split(lev_sep)[:-1] )
                 ret[sid] = self._find_core( tgts, er = error_rate, root_name = subtree )
                 #print sid #, ret[sid]
         return ret
