@@ -68,6 +68,7 @@ if __name__ == "__main__":
             for v in valin:
                 gt = int(v[0])
                 if last == gt:
+                    last = ""
                     continue
                 if last:
                     outbuf.append( lastv )
