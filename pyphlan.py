@@ -233,21 +233,47 @@ class PpaTree:
 
     def is_core( self, clade, targs, er = 0.95 ):
         intersection = clade.imgids & targs
-        core = self.core_test( len(intersection), clade.nterminals, er )
-        if core < 0.05 or len(intersection) == 0:
+
+        len_intersection = len(intersection)
+
+        if len(clade.imgids) == 2 and len_intersection < 2:
+           return False, 0.0, None
+
+        add = 0
+        for subclade in clade.clades:
+            if "?" in subclade.name:
+                out = subclade.imgids - intersection # targs  
+                add += len(out)
+        if add and len_intersection >= add:
+            len_intersection += int(round(add/1.99))
+
+        core = self.core_test( len_intersection, clade.nterminals, er )
+        if core < 0.05 or len_intersection == 0:
             return False, core, None
         nsubclades, nsubclades_absent = 0, 0
         for subclade in set(clade.get_nonterminals()) - set([clade]):
-            #nsubclades += 1 # !!!
+            if "?" in subclade.full_name: # full??/
+                continue
             if subclade.nterminals == 1:
                 nsubclades += 1 # !!!
                 if len(subclade.imgids & targs) == 0:
                     nsubclades_absent += 1
                 continue
-            subcore = self.core_test( len(subclade.imgids & targs), subclade.nterminals, er )    
+            
+            sc_intersection = subclade.imgids & targs
+            sc_len_intersection = len(sc_intersection)
+           
+            sc_add = 0
+            for sc_subclade in subclade.clades:
+                if "?" in sc_subclade.name:
+                    sc_out = sc_subclade.imgids - sc_intersection
+                    sc_add += len(sc_out)
+            if add and sc_len_intersection >= sc_add:
+                sc_len_intersection += int(round(sc_add/1.99))
+
+            subcore = self.core_test( sc_len_intersection, subclade.nterminals, er )    
             if subcore < 0.05:
                 return False, core, None
-        #if nsubclades == nsubclades_absent + 1: # !!!
         if nsubclades > 0 and nsubclades == nsubclades_absent:
             return False, core, None
         return True, core, intersection
@@ -255,7 +281,10 @@ class PpaTree:
     def _find_core( self, terminals, er = 0.95, root_name = None ):
         #terminals_s = set(terminals)
         def _find_core_rec( clade ):
-            clname = lev_sep.join( [root_name,clade.full_name ]) if root_name else clade.full_name
+            if root_name:
+                clname = lev_sep.join( [root_name]+clade.full_name.split(lev_sep)[1:] )
+            else:
+                clname = clade.full_name
             if clade.is_terminal():
                 if clade.imgid in terminals:
                     #n = terminals[clade.imgid]
@@ -263,6 +292,8 @@ class PpaTree:
                                 #n,n,n,
                                 1.0)]
                 return []
+            if "?" in clade.name:
+                return [] 
             if len(clade.imgids) == 1:
                 cimg = list(clade.imgids)[0]
                 if cimg in terminals:

@@ -11,3 +11,13 @@ def openw( fn ):
         return sys.stdout
     return bz2.BZ2File(fn,"w") if fn.endswith(".bz2") else open(fn,"w")
 
+
+
+def is_number(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
