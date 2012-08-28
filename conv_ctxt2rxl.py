@@ -33,16 +33,13 @@ if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
 
-    #openr = bz2.BZ2File if args['ctxt'] and args['ctxt'].endswith(".bz2") else open
     valin = []
-    #with (openr(args['ctxt']) if args['ctxt'] else sys.stdin) as inp:
     with utils.openr( args['ctxt'] ) as inp:
         for l in inp:
             tset = set([int(a) for a in l.strip().split('\t')][1:])
             if len(tset) < args['n']:
                 continue
             valin.append(tset)
-        #valin = [set([int(a) for a in l.strip().split('\t')]) for l in inp]
     all_t = set()
     for v in valin:
         all_t |= v
@@ -53,7 +50,6 @@ if __name__ == "__main__":
         #    continue
         res[t] = [int(t in v) for v in valin]
 
-    #openw = bz2.BZ2File if args['txt'].endswith(".bz2") else open
     with utils.openw(args['txt']) as out:
         n = len(res.values()[0])
         n_s = int(float(n)*args['subsample'])

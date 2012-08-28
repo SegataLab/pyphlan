@@ -42,3 +42,4 @@ if __name__ == "__main__":
     tree = ppa.PpaTree( args['intree'] )
     tree.reroot( strategy = args['s'], tf = args['f'], n = args['n']) # , name = args['name'] )
     tree.export( args['outtree'] )
+

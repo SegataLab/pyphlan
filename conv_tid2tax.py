@@ -17,11 +17,14 @@ def read_params( args ):
     p = ap.ArgumentParser(description='Generate a taxonomic txt hierarchy'
             ' with genome assignments from IMG taxa table\n')
 
+    
     p.add_argument( 'img', nargs='?', default=None, type=str,
             help=   "the input uc file [stdin if not present]")
     p.add_argument('txt', nargs='?', default=None, type=str,
             help=   "the output txt file compressed if fiven with bz2 extension\n"
                     "[stdout if not present]")
+    p.add_argument('-d', metavar="Domain",
+            default='Moc', choices=['Mic','Vir','Euk'] )
 
     return vars( p.parse_args() )
 
@@ -37,7 +40,7 @@ def get_qm( s ):
         return qm
     if s in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
         return qm
-    return s.replace("Candidatus ","").replace(" ","_").replace(".","_")
+    return s.replace("Candidatus ","").replace(" ","_").replace(".","_").replace(",","_")
 
 
 if __name__ == "__main__":
@@ -49,11 +52,19 @@ if __name__ == "__main__":
 
     with utils.openr(args['img'],"rU") as inp:
         table = pandas.read_table( inp, sep='\t', index_col=0)
-   
-    table = table[table['Domain'].isin(['Bacteria','Archaea'])]
-    table = table[table['Gene Count'] > 250.0]
-    table = table[table['Genome Size'] > 50000.0]
-   
+ 
+    if args['d'] == 'Mic': 
+        table = table[table['Domain'].isin(['Bacteria','Archaea'])]
+        table = table[table['Gene Count'] > 250.0]
+        table = table[table['Genome Size'] > 50000.0]
+    elif args['d'] == 'Vir':
+        table = table[table['Domain'].isin(['Viruses'])]
+        table = table[table['Gene Count'] > 0.0]
+    elif args['d'] == 'Euk':
+        table = table[table['Domain'].isin(['Eukaryota'])]
+        able = table[table['Gene Count'] > 1000.0]
+        table = table[table['Genome Size'] > 500000.0]
+
     table = table.reindex(columns=tax_lev_exp+['Genome Name'])
 
     with utils.openw(args['txt']) as out:
