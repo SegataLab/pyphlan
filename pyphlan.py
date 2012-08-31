@@ -292,7 +292,7 @@ class PpaTree:
                                 #n,n,n,
                                 1.0)]
                 return []
-            if "?" in clade.name:
+            if clade.name and "?" in clade.name:
                 return [] 
             if len(clade.imgids) == 1:
                 cimg = list(clade.imgids)[0]
@@ -351,7 +351,7 @@ class PpaTree:
             tgts = set([int(s) for s in vec[1:]])
 
             if len(tgts) >= min_core_size:
-                subtree_name = lev_sep.join(subtree.split(lev_sep)[:-1] )
+                subtree_name = lev_sep.join(subtree.split(lev_sep)[:-1] ) if subtree else None
                 ret[sid] = self._find_core( tgts, er = error_rate, root_name = subtree )
                 #print sid #, ret[sid]
         return ret
