@@ -17,7 +17,7 @@ def read_params( args ):
     p.add_argument( 'ctxt', nargs='?', default=None, type=str,
             help=   "the input ctxt file [stdin if not present]")
     p.add_argument('--b6o', metavar="The outfmt6 file for the cores",
-            default=None, required = True, type=str )
+            default=None, type=str )
     p.add_argument('-n', metavar="Total number of target sets (total targets in the b6o file if unspecified)",
             default=None, required = True, type=int )
     p.add_argument('--g2t', metavar="Mapping file from genes to taxa",
@@ -51,14 +51,17 @@ if __name__ == "__main__":
     with utils.openr( args['ctxt'] ) as inp:
         valin = (l.strip().split('\t') for l in inp)
 
-        inp_mat = ((int(a),int(b)) for a,b in (l.rstrip('\n').split("\t")[:2] for l in utils.openr(args['b6o'])))
-
         g2c = collections.defaultdict( set )
-        all_targets = set()
-        for fr,to in inp_mat:
-            all_targets.add( to )
-            if fr != to:
-                g2c[fr].add( to )
+        
+        if args['b6o']:
+            inp_mat = ((int(a),int(b)) for a,b in (l.rstrip('\n').split("\t")[:2] for l in utils.openr(args['b6o'])))
+    
+            #all_targets = set()
+            for fr,to in inp_mat:
+                #all_targets.add( to )
+                if fr != to:
+                    g2c[fr].add( to )
+
         n = args['n'] # if args['n'] else len(all_targets)
         n = float(n)
     
@@ -81,8 +84,8 @@ if __name__ == "__main__":
             for v in outbuf:
                 fr = int(v[0])
                 frt = g2t[fr]
-                nu = len(g2c[fr])
-                targett = list(set([g2t[s] for s in g2c[fr]]))
+                nu = len(g2c[fr]) if args['b6o'] else 0
+                targett = list(set([g2t[s] for s in g2c[fr]])) if args['b6o'] else []
                 targets = ":".join([str(s) for s in targett]) if targett else "-"
                 uniqueness = round(float(len(targett)) / n,3)
                 out.write( "\t".join([str(g2t[fr])]+v+[str(nu),str(len(targett)),str(uniqueness),targets]) +"\n" )
