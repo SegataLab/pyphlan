@@ -42,4 +42,4 @@ if __name__ == "__main__":
         out.write( str(len(fna))+" "+str(n)+"\n" )
 
         for k,v in fna.items():
-            out.write( str(k)[1:]+" "*(15-len(str(k)[1:]))+str(v.seq) +"\n" )
+            out.write( str(k)+" "*(15-len(str(k)[1:]))+str(v.seq) +"\n" )
