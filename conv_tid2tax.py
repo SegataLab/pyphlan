@@ -24,7 +24,7 @@ def read_params( args ):
             help=   "the output txt file compressed if fiven with bz2 extension\n"
                     "[stdout if not present]")
     p.add_argument('-d', metavar="Domain",
-            default='Moc', choices=['Mic','Vir','Euk'] )
+            default='Mic', choices=['Mic','Vir','Euk'] )
 
     return vars( p.parse_args() )
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         for i,t in table.iterrows():
             out.write( "\t".join( [ #str(-int(i)),
                                   ".".join( ["__".join([taxl, get_qm(t[taxle])]) 
-                                      for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i))]
+                                      for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
                                         ),
                                   #str(t['Genome Name'])
                                   ] ) + "\n")
