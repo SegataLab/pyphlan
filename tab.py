@@ -12,6 +12,14 @@ class Tab:
         #self.data = self.data[self.data[col] == val]
         pass     
 
+    def eq( self, x, y ):
+        t = type(y)
+        if x == y:
+            return True
+        try:
+            return t(x) == y
+        except Exception:
+            return False
 
     def get_cols( self, row = None, val = None, regex = None ):
         cols = []
@@ -37,7 +45,7 @@ class Tab:
                         cols.append(c)
             elif val:
                 for c,cs in self.data.iteritems():
-                    if val == cs[row]:
+                    if self.eq(val, cs[row]):
                         #del self.data[c]
                         cols.append(c)
             else:
