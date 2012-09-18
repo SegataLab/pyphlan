@@ -31,7 +31,7 @@ def read_params( args ):
     p.add_argument( '--newname', metavar="New name ", 
                     default=None, type=str)
 
-    reroot_st = ['name','lca','ltcs','longest_edge','longest_internal_edge','longest_internal_edge_n',"n_anc"]
+    reroot_st = ['root_name','lca','ltcs','longest_edge','longest_internal_edge','longest_internal_edge_n',"n_anc"]
     #reroot_st = ['lca','ltcs','midpoint','longest_edge','longest_internal_edge','longest_internal_edge_n']
     p.add_argument('-s', choices=reroot_st, default='longest_internal_edge', type=str,
             help=  "select rerooting strategy")

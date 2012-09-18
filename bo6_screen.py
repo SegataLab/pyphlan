@@ -4,6 +4,7 @@ from __future__ import with_statement
 
 import sys,argparse
 import utils 
+import collections
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='NCBI blast outfmt6 output processing')
@@ -30,6 +31,8 @@ def read_params(args):
                         help="column of the bit score (default 12)")
     parser.add_argument('-n', metavar='number of top hits', default=-1, type=int,
 			help="number of results to show (default -1 means all)")
+    parser.add_argument('-t', metavar='number of top hits per unique query', default=-1, type=int,
+			help="number of results per unique qeury to show (default -1 means all)")
     parser.add_argument('-s', default=None, choices=["evalue","bitscore","length","pid"], type=str,
 			help="the measure used to sort the output (default bitscore)")
     return vars(parser.parse_args()) 
@@ -60,10 +63,18 @@ def blast_ncbi_outfmt6_screen(par):
 
         if 'n' in par and par['n'] > -1:
             out_mat = out_mat[:par['n']]
-
+    
+    unique_queries = collections.defaultdict( int ) 
     with utils.openw(par['out_f']) if fout else sys.stdout as out_file:
-        for l in out_mat:
-            out_file.write("\t".join(l)+"\n")
+        if 't' in par and par['t'] > -1:
+            for l in out_mat:
+                unique_queries[l[0]] += 1
+                if unique_queries[l[0]] > par['t']:
+                    continue
+                out_file.write("\t".join(l)+"\n")
+        else:
+            for l in out_mat:
+                out_file.write("\t".join(l)+"\n")
 
 
 if __name__ == '__main__':
