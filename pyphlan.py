@@ -546,13 +546,16 @@ class PpaTree:
                 n = 1
             ct = list(self.tree.find_clades( {"name": name} ))
             if len( ct ) > 1:
-                sys.stderr.write( "Error: non-unique target specified." )
+                sys.stderr.write( "Error: non-unique target specified.\n" )
                 sys.exit(-1)
             node_path = list(self.tree.get_path(name))
             if not node_path or len(node_path) < n:
                 sys.stderr.write( "Error: no anchestors or number of anchestors < n." )
                 sys.exit(-1)
-            prune = node_path[-n]
+            toprune = node_path[-n]
+            fat = node_path[-n-1]
+            fat.clades = [cc for cc in fat.clades if cc != toprune]
+            prune = None 
         else:
             sys.stderr.write( strategy + " not supported yet." )
             sys.exit(-1)
