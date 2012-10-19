@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     with utils.openw(args['txt']) as out:
         for i,t in table.iterrows():
-            out.write( "\t".join( [ #str(-int(i)),
+            out.write( "\t".join( [ str(-int(i)),
                                   ".".join( ["__".join([taxl, get_qm(t[taxle])]) 
                                       for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
                                         ),
