@@ -71,9 +71,9 @@ if __name__ == "__main__":
             for v in valin:
                 gt = int(v[0])
                 if last == gt:
-                    last = ""
+                    lastv = ""
                     continue
-                if last:
+                if lastv:
                     outbuf.append( lastv )
                 last = gt
                 lastv = v
