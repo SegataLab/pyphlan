@@ -9,6 +9,7 @@ from collections import namedtuple as nt
 import random as rnd
 rnd.seed(1982)
 import utils
+from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
@@ -27,9 +28,11 @@ def read_params(args):
 if __name__ == '__main__':
     par = read_params(sys.argv)
 
-    ss = par['s'].lower
+    ss = par['s'].lower()
+    ssr = Seq(par['s']).reverse_complement().lower()
     f = os.path.basename(par['inp_f']).split(".")[0]
     with utils.openw( par['out_f'] ) as outf:
         for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"):
-            if ss in r.seq.lower:
+            rl = r.seq.lower()
+            if ss in rl or ssr in rl:
                 outf.write( f + "\t" + str(r.id) + "\n" )
