@@ -567,7 +567,7 @@ class PpaTree:
     def subtree( self, strategy, n = None, fn = None ):
         newroot = None
         if strategy == 'name':
-            ct = list(self.tree.find_clades( {"name": n} ))
+            ct = list(self.tree.find_clades( {"name": fn} ))
             if len( ct ) != 1:
                 int_clades = self.tree.get_nonterminals()
                 for cl in int_clades:
