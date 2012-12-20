@@ -12,14 +12,17 @@ import utils
 from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
+from Bio.SeqFeature import SeqFeature
 
 def read_params(args):
-    parser = argparse.ArgumentParser(description='Split/Select/Randomize/Subsample a multi fasta file')
+    parser = argparse.ArgumentParser(description='')
     arg = parser.add_argument
     arg( 'inp_f', metavar='INPUT_FILE', nargs='?', default=None, type=str,
          help="the input fna file [stdin if not present]")
     arg( 'out_f', metavar='OUTPUT_FILE', nargs='?', default=None, type=str,
          help="the output fna file [stdout if not present]")
+    arg( '-a', default=None, type=int,
+         help="number of char after the match to report")
 
     parser.add_argument('-s', metavar='Subsequene to look for', required = True, type = str )
 
@@ -35,4 +38,13 @@ if __name__ == '__main__':
         for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"):
             rl = r.seq.lower()
             if ss in rl or ssr in rl:
-                outf.write( f + "\t" + str(r.id) + "\n" )
+                if par['a']:
+                    if ss in rl:
+                        i = str(rl).index(str(ss))
+                        subs = rl[i:i+len(ss)+par['a']] if i+len(ss)+par['a'] < len(rl) else rl[i:]
+                    else:
+                        i = str(rl).index(str(ssr))
+                        subs = rl[i:i+len(ssr)+par['a']] if i+len(ssr)+par['a'] < len(rl) else rl[i:]
+                    outf.write( f + "\t" + str(r.id) + "\t" + str(subs) + "\n" )
+                else:
+                    outf.write( f + "\t" + str(r.id) + "\n" )
