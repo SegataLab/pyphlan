@@ -278,7 +278,7 @@ class PpaTree:
             return False, core, None
         return True, core, intersection
 
-    def _find_core( self, terminals, er = 0.95, root_name = None ):
+    def _find_core( self, terminals, er = 0.95, root_name = None, skip_qm = True ):
         #terminals_s = set(terminals)
         def _find_core_rec( clade ):
             if root_name:
@@ -292,7 +292,7 @@ class PpaTree:
                                 #n,n,n,
                                 1.0)]
                 return []
-            if clade.name and "?" in clade.name:
+            if skip_qm and clade.name and "?" in clade.name:
                 return [] 
             if len(clade.imgids) == 1:
                 cimg = list(clade.imgids)[0]
@@ -326,7 +326,7 @@ class PpaTree:
                 _add_full_paths_( c, lpath )
         _add_full_paths_( self.tree.root, [] )
 
-    def find_cores( self, cl_taxa_file, min_core_size = 1, error_rate = 0.95, subtree = None ):
+    def find_cores( self, cl_taxa_file, min_core_size = 1, error_rate = 0.95, subtree = None, skip_qm = True ):
         if subtree:
             self.subtree( 'name', subtree ) 
         self.ctc = {}
@@ -352,7 +352,7 @@ class PpaTree:
 
             if len(tgts) >= min_core_size:
                 subtree_name = lev_sep.join(subtree.split(lev_sep)[:-1] ) if subtree else None
-                ret[sid] = self._find_core( tgts, er = error_rate, root_name = subtree )
+                ret[sid] = self._find_core( tgts, er = error_rate, root_name = subtree, skip_qm = skip_qm )
                 #print sid #, ret[sid]
         return ret
    
