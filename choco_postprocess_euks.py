@@ -67,13 +67,13 @@ if __name__ == "__main__":
             q20[c] = mtree.lca( [str(tt) for tt in cen2data[c]['tsout'] if str(tt) in mall] ).full_name.split(".t__")[0]
         """
 
-        def maxn(x,y): return x > 300 
+        def maxn(x,y): return x > 2000 
 
         n = 0
         for o in q0:
             sys.stdout.write( "\t".join([ str(o),str(t),""]) + "\n" )
             n += 1
-            if n > 300:
+            if n > 2000:
                 break
 
         if maxn( n, len(cs) ):
