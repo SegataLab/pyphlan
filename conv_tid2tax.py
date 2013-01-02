@@ -32,6 +32,8 @@ qm = "?"
 def get_qm( s ):
     if s is None:
         return qm
+    if s == "-1":
+        return qm
     if not s:
         return qm
     if type(s) != str:
@@ -71,7 +73,8 @@ if __name__ == "__main__":
         for i,t in table.iterrows():
             out.write( "\t".join( [ str(-int(i)),
                                   ".".join( ["__".join([taxl, get_qm(t[taxle])]) 
-                                      for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
+                                      #for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
+                                      for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i))]
                                         ),
                                   #str(t['Genome Name'])
                                   ] ) + "\n")
