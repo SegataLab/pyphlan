@@ -39,15 +39,18 @@ if __name__ == "__main__":
 
 
     if args['g2t']:
-        with open( args['g2t'] ) as inp:
-            g2t = dict(([int(a) for a in l.strip().split('\t')] for l in inp))
+        with utils.openr( args['g2t'] ) as inp:
+            #g2t = dict(([int(a) for a in l.strip().split('\t')] for l in inp))
+            for l in inp:
+                f,t = l.strip().split('\t')
+                g2t[int(f)] = int(t)
     elif args['t2g']:
-        with open( args['t2g'] ) as inp:
+        with utils.openr( args['t2g'] ) as inp:
             for ll in (l.strip().split('\t') for l in inp):
                 for g in ll[1:]:
                     g2t[int(g)] = int(ll[0])
     
-    for j,v in enumerate(valin):
+    for v in valin:
         valin[j] = [v[0]]+list(set(g2t[vv] for vv in v))
 
     with utils.openw(args['txt']) as out:
