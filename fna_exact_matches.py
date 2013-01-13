@@ -23,6 +23,8 @@ def read_params(args):
          help="the output fna file [stdout if not present]")
     arg( '-a', default=None, type=int,
          help="number of char after the match to report")
+    arg( '-n', default=None, type=int,
+         help="number of matching primers")
 
     parser.add_argument('-s', metavar='Subsequene to look for', required = True, type = str )
 
@@ -47,4 +49,8 @@ if __name__ == '__main__':
                         subs = rl[i:i+len(ssr)+par['a']] if i+len(ssr)+par['a'] < len(rl) else rl[i:]
                     outf.write( f + "\t" + str(r.id) + "\t" + str(subs) + "\n" )
                 else:
-                    outf.write( f + "\t" + str(r.id) + "\n" )
+                    if par['n']:
+                        n = str(rl).count(str(ss)) + str(rl).count(str(ssr))
+                        outf.write( f + "\t" + str(r.id) + "\t" + str(n) + "\n" )
+                    else:
+                        outf.write( f + "\t" + str(r.id) + "\n" )
