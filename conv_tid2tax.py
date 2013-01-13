@@ -5,6 +5,7 @@ import collections
 import utils
 import pandas
 import StringIO
+import tempfile
 
 try:
     import argparse as ap
@@ -24,6 +25,7 @@ def read_params( args ):
             help=   "the output txt file compressed if fiven with bz2 extension\n"
                     "[stdout if not present]")
     p.add_argument('--NCBI_names', metavar="NCBI names.dmp", default = None )
+    p.add_argument('--corrections', metavar="Correction file", default = None )
     p.add_argument('-d', metavar="Domain",
             default='Mic', choices=['Mic','Vir','Euk'] )
 
@@ -55,7 +57,31 @@ if __name__ == "__main__":
     tax_lev = "dpcofgs"
     tax_lev_exp = ['Domain','Phylum','Class','Order','Family','Genus','Species']
 
-    with utils.openr(args['img'],"rU") as inp:
+    fp = tempfile.TemporaryFile()
+
+    if args['corrections']:
+        with utils.openr(args['corrections']) as inp:
+            frto = {}
+            frtoid = {}
+            for pat in (l.split('\t') for l in inp):
+                if len(pat) == 2:
+                    frto[pat[0].strip()] = pat[1].strip()
+                else:
+                    frtoid[pat[0].strip()] = (pat[1].strip(),pat[2].strip())
+            with utils.openr(args['img'],"rU") as inpf:
+                nfa = []
+                for l in inpf:
+                    nf = l
+                    for f,t in frto.items():
+                        nf = nf.replace(f,t)
+                    for i,(f,t) in frtoid.items():
+                        if l.startswith(i+"\t"):
+                            nf = nf.replace(f,t)
+                    nfa.append(nf) 
+                fp.write( "".join( nfa ) )
+                fp.seek(0)
+
+    with (utils.openr(args['img'],"rU") if not args['corrections'] else fp) as inp:
         table = pandas.read_table( inp, sep='\t', index_col=0)
  
     if args['d'] == 'Mic': 
