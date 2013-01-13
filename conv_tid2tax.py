@@ -29,19 +29,14 @@ def read_params( args ):
     return vars( p.parse_args() )
 
 qm = "?"
-def get_qm( s ):
-    if s is None:
-        return qm
-    if s == "-1":
-        return qm
-    if not s:
-        return qm
-    if type(s) != str:
-        return qm
-    if s in ['Unclassified','unclassified']:
-        return qm
-    if s in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
-        return qm
+def get_qm( s, t, existing_species ):
+    name = t['Proposal Name'].replace("Candidatus ","").split(" ")[:2]
+    genus, species = name if len(name) > 1 else (None,None)
+    if s is None or s == "-1" or not s or type(s) != str or  s in ['Unclassified','unclassified'] or s in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
+        if species in existing_species.values():
+            s = species 
+        else:
+            return qm
     return s.replace("Candidatus ","").replace(" ","_").replace(".","_").replace(",","_")
 
 
@@ -67,12 +62,17 @@ if __name__ == "__main__":
         able = table[table['Gene Count'] > 1000.0]
         table = table[table['Genome Size'] > 500000.0]
 
-    table = table.reindex(columns=tax_lev_exp+['Genome Name'])
+    infos = ['Proposal Name']
+    table = table.reindex(columns=infos+tax_lev_exp+['Genome Name'])
+    table['Genus'] = [t.replace("Candidatus ","") for t in table['Genus']]
+
+    toexcl = ['Candidatus','sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.','Unclassified','unclassified',"-1"]
+    existing_species = dict([(b,a) for a,b in list(set(zip(list(table['Species']),list(table['Genus'])))) if a not in toexcl])
 
     with utils.openw(args['txt']) as out:
         for i,t in table.iterrows():
             out.write( "\t".join( [ str(-int(i)),
-                                  ".".join( ["__".join([taxl, get_qm(t[taxle])]) 
+                                  ".".join( ["__".join([taxl, get_qm(t[taxle],t,existing_species)]) 
                                       #for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
                                       for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i))]
                                         ),
