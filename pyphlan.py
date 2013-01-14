@@ -236,7 +236,7 @@ class PpaTree:
 
         len_intersection = len(intersection)
 
-        if len(clade.imgids) == 2 and len_intersection < 2:
+        if len(clade.imgids) >= 2 and len_intersection < 2:
            return False, 0.0, None
 
         add = 0
@@ -282,7 +282,9 @@ class PpaTree:
         #terminals_s = set(terminals)
         def _find_core_rec( clade ):
             if root_name:
-                clname = lev_sep.join( [root_name]+clade.full_name.split(lev_sep)[1:] )
+                #clname = lev_sep.join( [root_name]+clade.full_name.split(lev_sep)[1:] )
+                #clname = lev_sep.join( clade.full_name[1:] )
+                clname = clade.full_name
             else:
                 clname = clade.full_name
             if clade.is_terminal():

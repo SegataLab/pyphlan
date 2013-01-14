@@ -33,7 +33,7 @@ def read_params( args ):
 if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
-    
+   
     if not args['g2t'] and not args['t2g']:
         sys.stdout.write("Error one of --t2g and --g2t must be provided\n")
         sys.exit(0)
@@ -47,7 +47,6 @@ if __name__ == "__main__":
                 for g in ll[1:]:
                     g2t[int(g)] = int(ll[0])
     
-
     with utils.openr( args['ctxt'] ) as inp:
         valin = (l.strip().split('\t') for l in inp)
 
@@ -68,6 +67,7 @@ if __name__ == "__main__":
         with utils.openw(args['mtxt']) as out:
             last,lastv = "",[]
             outbuf = []
+            gt = None
             for v in valin:
                 gt = int(v[0])
                 if last == gt:
@@ -77,10 +77,8 @@ if __name__ == "__main__":
                     outbuf.append( lastv )
                 last = gt
                 lastv = v
-            if last != gt and last:
+            if last and last != gt:
                 outbuf.append( lastv )
-
-
             for v in outbuf:
                 fr = int(v[0])
                 frt = g2t[fr]
