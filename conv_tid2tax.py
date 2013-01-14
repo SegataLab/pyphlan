@@ -112,7 +112,7 @@ if __name__ == "__main__":
     ncbiid = dict([(int(a),None) for a in table['NCBI Taxon ID']])
 
     if args['NCBI_names']:
-        for line in (l.strip().split("|") for l in open("names.dmp")):
+        for line in (l.strip().split("|") for l in open(args['NCBI_names'])):
             if int(line[0]) in ncbiid and "scientific name" in line[3]:
                 ncbiid[int(line[0])] = " ".join(line[1].replace("Candidatus ","").strip().split(" ")[:2])
 
