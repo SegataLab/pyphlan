@@ -5,6 +5,7 @@ import collections
 import utils
 import pandas
 import StringIO
+import tempfile
 
 try:
     import argparse as ap
@@ -23,25 +24,29 @@ def read_params( args ):
     p.add_argument('txt', nargs='?', default=None, type=str,
             help=   "the output txt file compressed if fiven with bz2 extension\n"
                     "[stdout if not present]")
+    p.add_argument('--NCBI_names', metavar="NCBI names.dmp", default = None )
+    p.add_argument('--corrections', metavar="Correction file", default = None )
     p.add_argument('-d', metavar="Domain",
             default='Mic', choices=['Mic','Vir','Euk'] )
 
     return vars( p.parse_args() )
 
 qm = "?"
-def get_qm( s ):
-    if s is None:
-        return qm
-    if s == "-1":
-        return qm
-    if not s:
-        return qm
-    if type(s) != str:
-        return qm
-    if s in ['Unclassified','unclassified']:
-        return qm
-    if s in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
-        return qm
+def get_qm( s, ncbiid, t, existing_species ):
+    name = t['Genome Name / Sample Name'].replace("Candidatus ","").split(" ")[:2]
+    genus, species = name if len(name) > 1 else ("","")
+    if s is None or s == "-1" or not s or type(s) != str or  s in ['Unclassified','unclassified'] or s in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
+        if species in existing_species[t['Genus']] and genus == t['Genus']:
+            s = species 
+            #print str(t.name)+"\t+\t"+str(genus)+" "+str(species)
+        else: # species not in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
+            #print "--",species
+            if genus == t['Genus']  and genus + " " + species == str(ncbiid[t['NCBI Taxon ID']]):
+                s = species
+                #print str(t.name)+"\t**\t"+str(genus)+" "+str(species)
+            else:
+                #print ">", genus, t['Genus'],  t['NCBI Taxon ID'], genus + " " + species, str(ncbiid[t['NCBI Taxon ID']])
+                return qm
     return s.replace("Candidatus ","").replace(" ","_").replace(".","_").replace(",","_")
 
 
@@ -52,7 +57,31 @@ if __name__ == "__main__":
     tax_lev = "dpcofgs"
     tax_lev_exp = ['Domain','Phylum','Class','Order','Family','Genus','Species']
 
-    with utils.openr(args['img'],"rU") as inp:
+    fp = tempfile.TemporaryFile()
+
+    if args['corrections']:
+        with utils.openr(args['corrections']) as inp:
+            frto = {}
+            frtoid = {}
+            for pat in (l.split('\t') for l in inp):
+                if len(pat) == 2:
+                    frto[pat[0].strip()] = pat[1].strip()
+                else:
+                    frtoid[pat[0].strip()] = (pat[1].strip(),pat[2].strip())
+            with utils.openr(args['img'],"rU") as inpf:
+                nfa = []
+                for l in inpf:
+                    nf = l
+                    for f,t in frto.items():
+                        nf = nf.replace(f,t)
+                    for i,(f,t) in frtoid.items():
+                        if l.startswith(i+"\t"):
+                            nf = nf.replace(f,t)
+                    nfa.append(nf) 
+                fp.write( "".join( nfa ) )
+                fp.seek(0)
+
+    with (utils.openr(args['img'],"rU") if not args['corrections'] else fp) as inp:
         table = pandas.read_table( inp, sep='\t', index_col=0)
  
     if args['d'] == 'Mic': 
@@ -67,12 +96,30 @@ if __name__ == "__main__":
         able = table[table['Gene Count'] > 1000.0]
         table = table[table['Genome Size'] > 500000.0]
 
-    table = table.reindex(columns=tax_lev_exp+['Genome Name'])
+    toexcl = ['Candidatus','sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.','Unclassified','unclassified',"-1"]
+    #table['Species'] = [("-1" if t in toexcl else t) for t in table['Species']]
+
+    infos = ['Genome Name / Sample Name','NCBI Taxon ID']
+    table = table.reindex(columns=infos+tax_lev_exp+['Genome Name'])
+    table['Genus'] = [t.replace("Candidatus ","") for t in table['Genus']]
+
+    existing_species_l = [(b,a) for a,b in list(set(zip(list(table['Species']),list(table['Genus'])))) if a not in toexcl]
+    existing_species = collections.defaultdict( set )
+    for a,b in existing_species_l:
+        existing_species[a].add(" ".join(b.replace("Candidatus ","").split(" ")[:2]))
+
+    ncbi_species = set()
+    ncbiid = dict([(int(a),None) for a in table['NCBI Taxon ID']])
+
+    if args['NCBI_names']:
+        for line in (l.strip().split("|") for l in open("names.dmp")):
+            if int(line[0]) in ncbiid and "scientific name" in line[3]:
+                ncbiid[int(line[0])] = " ".join(line[1].replace("Candidatus ","").strip().split(" ")[:2])
 
     with utils.openw(args['txt']) as out:
         for i,t in table.iterrows():
             out.write( "\t".join( [ str(-int(i)),
-                                  ".".join( ["__".join([taxl, get_qm(t[taxle])]) 
+                                  ".".join( ["__".join([taxl, get_qm(t[taxle],ncbiid,t,existing_species)]) 
                                       #for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
                                       for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i))]
                                         ),
