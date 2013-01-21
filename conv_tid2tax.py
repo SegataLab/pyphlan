@@ -32,16 +32,16 @@ def read_params( args ):
     return vars( p.parse_args() )
 
 qm = "?"
-def get_qm( s, ncbiid, t, existing_species ):
+def get_qm( s, ncbiid, t, tl, existing_species ):
     name = t['Genome Name / Sample Name'].replace("Candidatus ","").split(" ")[:2]
     genus, species = name if len(name) > 1 else ("","")
-    if s is None or s == "-1" or not s or type(s) != str or  s in ['Unclassified','unclassified'] or s in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
-        if species in existing_species[t['Genus']] and genus == t['Genus']:
-            s = species 
+    if s is None or s == "-1" or not s or type(s) != str or  s in ['Unclassified','unclassified'] or s.split("_")[0] in ['bacterium','sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
+        if tl == 's' and species in existing_species[t['Genus']] and genus == t['Genus']:
+            s = species
             #print str(t.name)+"\t+\t"+str(genus)+" "+str(species)
         else: # species not in ['sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
             #print "--",species
-            if genus == t['Genus']  and genus + " " + species == str(ncbiid[t['NCBI Taxon ID']]):
+            if tl == 's' and genus == t['Genus']  and genus + " " + species == str(ncbiid[t['NCBI Taxon ID']]) and species not in ['bacterium','sp','sp.','Sp','Sp.','spp','spp.','Spp','Spp.']:
                 s = species
                 #print str(t.name)+"\t**\t"+str(genus)+" "+str(species)
             else:
@@ -49,6 +49,21 @@ def get_qm( s, ncbiid, t, existing_species ):
                 return qm
     return s.replace("Candidatus ","").replace(" ","_").replace(".","_").replace(",","_")
 
+def add_unnamed( arr ):
+    gunamed = "?" in arr[-2]
+    if "?" in arr[0]:
+        return a
+    lt,last = 'd',arr[0]
+    v = [arr[0]]
+    for a in arr[1:-2]:
+        if "?" in a and not gunamed:
+            v.append( a[:3] + last+"_noname" )
+        else:
+            v.append( a )
+        lt,last = a[0],(a[3:] if "?" not in a else last)
+    v += arr[-2:] 
+        
+    return v 
 
 if __name__ == "__main__":
     args = read_params( sys.argv )
@@ -119,9 +134,8 @@ if __name__ == "__main__":
     with utils.openw(args['txt']) as out:
         for i,t in table.iterrows():
             out.write( "\t".join( [ str(-int(i)),
-                                  ".".join( ["__".join([taxl, get_qm(t[taxle],ncbiid,t,existing_species)]) 
-                                      #for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i) if i.is_integer() else "Nan")]
-                                      for taxl,taxle in  zip(tax_lev,tax_lev_exp)] + ["t__"+str(-int(i))]
+                                  ".".join( add_unnamed(["__".join([taxl, get_qm(t[taxle],ncbiid,t,taxl,existing_species)]) 
+                                      for taxl,taxle in  zip(tax_lev,tax_lev_exp)]) + ["t__"+str(-int(i))]
                                         ),
                                   #str(t['Genome Name'])
                                   ] ) + "\n")
