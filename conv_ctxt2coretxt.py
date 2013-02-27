@@ -72,7 +72,7 @@ if __name__ == "__main__":
                 if ko:
                     continue
 
-                valin = [valin[0]]+list(valin) 
+                valin = list(valin) 
     
                 out.write( "\t".join([str(s) for s in valin]) +"\n" )
 
