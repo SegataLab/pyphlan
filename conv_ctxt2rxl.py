@@ -57,4 +57,4 @@ if __name__ == "__main__":
         indok = set(random.sample( list(range(n)), n_s))
 
         for k,v in res.items():
-            out.write( args['p'] + str(k)[1:]+" "*(15-len(str(k)[1:]))+"".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
+            out.write( args['p'] + str(k)+" "*(15-len(str(k)[1:]))+"".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
