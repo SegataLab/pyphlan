@@ -20,7 +20,8 @@ def read_params( args ):
             help=   "the file with all the MLST profiles [in the format >profilineName_profileID")
     p.add_argument( '--txt', required=True, default=None, type=str,
             help=   "the table of the samples to profiles [tab-delimited, columns ID are profileName]")
-    
+    p.add_argument( '--nmiss', default = 0, type = int )
+
     return vars( p.parse_args() )
 
 if __name__ == "__main__":
@@ -40,6 +41,7 @@ if __name__ == "__main__":
             profiles[l[0]] = dict([(na,l[n+1]) for n,na in enumerate(mlst_names)])
     for s,p in profiles.items():
         seq = ""
+        skip = 0 
         for n in mlst_names:
             name = p[n]
             if name not in fna:
@@ -47,7 +49,10 @@ if __name__ == "__main__":
             if name in fna:
                 seq += fna[name].seq
             else:
+                skip += 1
                 continue
+        if skip > args['nmiss']:
+            continue
         sample = SeqRecord( "sample_"+s  )
         sample.id = "t"+s if s[0] in "0123456789" else s
         sample.description = ""
