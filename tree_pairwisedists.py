@@ -35,7 +35,8 @@ if __name__ == "__main__":
     ppatree = ppa.PpaTree( args['intree'] )
 
     dists = ppa.dist_matrix(ppatree.tree) 
-    tbl = ppatree.tree.total_branch_length()-1.0 if args['n'] else 1.0
+    tbl = ppatree.tree.total_branch_length() if args['n'] else 1.0
+    #tbl = ppatree.tree.total_branch_length()-1.0 if args['n'] else 1.0
 
     with utils.openw( args['out_file'] ) as out:
         for k1,v1 in dists.items():

@@ -25,6 +25,7 @@ def read_params( args ):
                     "[stdout if not present]")
     p.add_argument('-n', default=1, type=int )
     p.add_argument('-c', default=1, type=int )
+    p.add_argument('--out_taxa', default=0, type=int )
 
     return vars( p.parse_args() )
 
@@ -73,8 +74,11 @@ if __name__ == "__main__":
                     continue
 
                 valin = list(valin) 
-    
-                out.write( "\t".join([str(s) for s in valin]) +"\n" )
+   
+                if args['out_taxa']:
+                    out.write( "\t".join([str(g2t[s]) for s in valin]) +"\n" ) 
+                else:    
+                    out.write( "\t".join([str(s) for s in valin]) +"\n" )
 
 
 
