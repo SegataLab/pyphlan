@@ -38,12 +38,16 @@ if __name__ == "__main__":
                 continue
             l = line.strip().split('\t')
             profiles[l[0]] = dict([(na,l[n+1]) for n,na in enumerate(mlst_names)])
-
     for s,p in profiles.items():
         seq = ""
         for n in mlst_names:
-            name = n+"_"+p[n]
-            seq += fna[name].seq
+            name = p[n]
+            if name not in fna:
+                name = n+"_"+p[n]
+            if name in fna:
+                seq += fna[name].seq
+            else:
+                continue
         sample = SeqRecord( "sample_"+s  )
         sample.id = "t"+s if s[0] in "0123456789" else s
         sample.description = ""
