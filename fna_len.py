@@ -33,4 +33,5 @@ if __name__ == '__main__':
                 ltot += l
             else:
                 outf.write( "\t".join( [r.id,str(l)] ) + "\n" ) 
-    outf.write( "\t".join( [str(l)] ) + "\n" ) 
+        if par['total']:
+            outf.write( str(ltot) + "\n" ) 
