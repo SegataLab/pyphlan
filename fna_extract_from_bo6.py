@@ -20,6 +20,7 @@ def read_params(args):
          help="the output fna file [stdout if not present]")
 
     parser.add_argument('--extract_targets', action='store_true', help="Select fna entries\n")
+    parser.add_argument('-i', action='store_true', help="Add hit stats to fna entries\n")
     
     parser.add_argument('--bo6', metavar='Bo6 file', required=True, type = str )
 
@@ -31,16 +32,20 @@ if __name__ == '__main__':
     inp_mat = (l.rstrip('\n').split("\t") for l in (utils.openr(par['bo6'])))
 
     if par['extract_targets']:
-        toextr = ((l[1], int(l[8]), int(l[9])) for l in inp_mat)
+        toextr = ((l[1], l[2], l[3], l[11], int(l[8]), int(l[9])) for l in inp_mat)
     else:
-        toextr = ((l[0], int(l[6]), int(l[7])) for l in inp_mat)
+        toextr = ((l[0], l[2],  l[3], l[11], int(l[6]), int(l[7])) for l in inp_mat)
    
     inpfasta = SeqIO.to_dict(SeqIO.parse( utils.openr(par['inp_f']), "fasta"))
 
     out_seqs = []
-    for n,fr,to in toextr:
+    for n,pid,l,bit,fr,to in toextr:
         n = inpfasta[n][min(fr,to):max(fr,to)]
-        n.id = n.id+"_"+str(fr)+"_"+str(to)
+        if par['i']:
+            p = "_pid"+pid+"_l"+l+"_bs"+bit
+        else:
+            p = ""
+        n.id = n.id+"_"+str(fr)+"_"+str(to)+p
         out_seqs.append( n )
 
     SeqIO.write(out_seqs, utils.openw(par['out_f']), "fasta") 
