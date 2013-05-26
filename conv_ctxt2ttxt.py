@@ -18,6 +18,8 @@ def read_params( args ):
             help=   "the input ctxt file [stdin if not present]")
     p.add_argument('--g2t', metavar="Mapping file from genes to taxa",
             default=None, type=str )
+    p.add_argument('-n', metavar="Minimum size of cluster to report (def 1, means all)",
+            default=1, type=int )
     p.add_argument('--t2g', metavar="Mapping file from taxa to genes",
             default=None, type=str )
     p.add_argument('txt', nargs='?', default=None, type=str,
@@ -88,7 +90,8 @@ if __name__ == "__main__":
                 valin = [valin[0]]+list(set(g2t[vv] for vv in valin)) 
     
                 #for v in sorted(valin,key=lambda x:-len(x)):
-                out.write( "\t".join([str(s) for s in valin]) +"\n" )
+                if len(valin) > args['n']:
+                    out.write( "\t".join([str(s) for s in valin]) +"\n" )
 
 
 
