@@ -42,7 +42,7 @@ if __name__ == '__main__':
     for n,pid,l,bit,fr,to in toextr:
         n = inpfasta[n][min(fr,to):max(fr,to)]
         if par['i']:
-            p = "_pid"+pid+"_l"+l+"_bs"+bit
+            p = "_pid"+pid.strip()+"_l"+l.strip()+"_bs"+bit.strip()
         else:
             p = ""
         n.id = n.id+"_"+str(fr)+"_"+str(to)+p
