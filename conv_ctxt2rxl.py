@@ -26,17 +26,20 @@ def read_params( args ):
             default=0, type=int )
     p.add_argument('-p', metavar="Prefix for taxon names",
             default="", type=str )
+    p.add_argument('--sk', action='store_true' )
 
     return vars( p.parse_args() )
 
 if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
+    
+    gint = str if args['sk'] else int
 
     valin = []
     with utils.openr( args['ctxt'] ) as inp:
         for l in inp:
-            tset = set([int(a) for a in l.strip().split('\t')][1:])
+            tset = set([gint(a) for a in l.strip().split('\t')][1:])
             if len(tset) < args['n']:
                 continue
             valin.append(tset)
