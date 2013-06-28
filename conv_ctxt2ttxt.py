@@ -22,15 +22,19 @@ def read_params( args ):
             default=1, type=int )
     p.add_argument('--t2g', metavar="Mapping file from taxa to genes",
             default=None, type=str )
+    p.add_argument('--sk', action='store_true' )
     p.add_argument('txt', nargs='?', default=None, type=str,
             help=   "the output gtxt file, compressed if fiven with bz2 extension\n"
                     "[stdout if not present]")
 
     return vars( p.parse_args() )
 
+
 if __name__ == "__main__":
     args = read_params( sys.argv )
     uc2cl = collections.defaultdict( set )
+
+    gint = str if args['sk'] else int
 
     """
     with utils.openr( args['ctxt'] ) as inp:
@@ -73,12 +77,12 @@ if __name__ == "__main__":
             #g2t = dict(([int(a) for a in l.strip().split('\t')] for l in inp))
             for l in inp:
                 f,t = l.strip().split('\t')
-                g2t[int(f)] = int(t)
+                g2t[gint(f)] = gint(t)
     elif args['t2g']:
         with utils.openr( args['t2g'] ) as inp:
             for ll in (l.strip().split('\t') for l in inp):
                 for g in ll[1:]:
-                    g2t[int(g)] = int(ll[0])
+                    g2t[gint(g)] = gint(ll[0])
     
     #for v in valin:
     #    valin[j] = [v[0]]+list(set(g2t[vv] for vv in v))
@@ -86,7 +90,7 @@ if __name__ == "__main__":
     with utils.openw(args['txt']) as out:
         with utils.openr( args['ctxt'] ) as inp:
             for l in inp:
-                valin = [int(a) for a in l.strip().split('\t')]
+                valin = [gint(a) for a in l.strip().split('\t')]
                 valin = [valin[0]]+list(set(g2t[vv] for vv in valin)) 
     
                 #for v in sorted(valin,key=lambda x:-len(x)):
