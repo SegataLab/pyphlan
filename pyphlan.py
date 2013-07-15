@@ -685,6 +685,21 @@ class PpaTree:
         #self._ord_terms[-1].nc = None # self._ord_terms[0]
 
 
+    def get_subtree_leaves( self, full_names = False ):
+
+        subtrees = []
+        def rec_subtree_leaves( clade ):
+            if not len(clade.clades):
+                return [clade.name]
+            leaves = []
+            for c in clade.clades:
+                leaves += rec_subtree_leaves( c )
+            leaves = [l for l in leaves if l]
+            subtrees.append( (clade.name if clade.name else "",leaves)  )
+            return leaves 
+
+        rec_subtree_leaves( self.tree.root )
+        return subtrees
 
     def get_clade_names( self, full_names = False, leaves = True, internals = True ):
         clades = []
