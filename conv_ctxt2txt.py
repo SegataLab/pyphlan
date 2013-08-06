@@ -30,6 +30,7 @@ def read_params( args ):
             default="", type=str )
     p.add_argument('--sk', action='store_true' )
     p.add_argument('-s', action='store_true' )
+    p.add_argument('--original_gene_names', action='store_true' )
 
     return vars( p.parse_args() )
 
@@ -39,13 +40,14 @@ if __name__ == "__main__":
     
     gint = str if args['sk'] else int
 
-    valin = []
+    valin, kin = [], []
     with utils.openr( args['ctxt'] ) as inp:
         for l in inp:
             tset = set([gint(a) for a in l.strip().split('\t')][1:])
             if len(tset) < args['n']:
                 continue
             valin.append(tset)
+            kin.append( l.strip().split('\t')[0] )
     all_t = set()
     for v in valin:
         all_t |= v
@@ -69,7 +71,10 @@ if __name__ == "__main__":
         n = len(res.values()[0])
         n_s = int(float(n)*args['subsample'])
         indok = set(random.sample( list(range(n)), n_s))
-        out.write( "\t".join(['genes']+["g"+str(v) for v in range(n)]) + "\n" )
+        if args['original_gene_names']:
+            out.write( "\t".join(['genes']+[kin[v] for v in range(n)]) + "\n" )
+        else:
+            out.write( "\t".join(['genes']+["g"+str(v) for v in range(n)]) + "\n" )
 
         for k,v in res.items():
             out.write( args['p'] + str(k)+"\t"+"\t".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
