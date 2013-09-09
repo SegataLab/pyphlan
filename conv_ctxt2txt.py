@@ -58,7 +58,7 @@ if __name__ == "__main__":
         #    continue
         res[t] = [int(t in v) for v in valin]
 
-    if args['s']:
+    if True or args['s']:
         keys = sorted( res.keys() )
         v = ["".join([str(vvv) for vvv in vv]) for vv in zip(*[res[k] for k in keys])]
         resk = collections.defaultdict( int )
