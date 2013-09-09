@@ -58,7 +58,7 @@ if __name__ == "__main__":
         #    continue
         res[t] = [int(t in v) for v in valin]
 
-    if True or args['s']:
+    if args['s']:
         keys = sorted( res.keys() )
         v = ["".join([str(vvv) for vvv in vv]) for vv in zip(*[res[k] for k in keys])]
         resk = collections.defaultdict( int )
@@ -71,10 +71,24 @@ if __name__ == "__main__":
         n = len(res.values()[0])
         n_s = int(float(n)*args['subsample'])
         indok = set(random.sample( list(range(n)), n_s))
+
+        torem = set()
+        if not args['s'] and args['m']:
+            torem = set([i for i,l in enumerate(zip(*res.values())) if sum(l) < args['m']])
+
         if args['original_gene_names']:
             out.write( "\t".join(['genes']+[kin[v] for v in range(n)]) + "\n" )
         else:
             out.write( "\t".join(['genes']+["g"+str(v) for v in range(n)]) + "\n" )
 
         for k,v in res.items():
-            out.write( args['p'] + str(k)+"\t"+"\t".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
+            out.write( args['p'] + str(k)+"\t"+"\t".join([str(s) for i,s in enumerate(v) if i in indok and i not in torem]) +"\n" )
+
+
+
+
+
+
+
+
+
