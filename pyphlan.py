@@ -160,8 +160,8 @@ class PpaTree:
     def __load_tree_txt__( self, fn ):
         tree = Phylo.BaseTree.Tree()
         try:
-            rows = [l.rstrip().split("\t")[0] for l in 
-                        open(fn, 'r').readlines()]
+            rows = [l.decode('utf-8').rstrip().split("\t")[0] for l in 
+                        open(fn, 'rb')]
         except IOError:
             raise IOError()
       
