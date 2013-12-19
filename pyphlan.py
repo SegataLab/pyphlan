@@ -15,7 +15,7 @@ import collections as colls
 import sys
 #core_test = lambda ok,tot,pr: 1.0-st.binom.sf(ok,tot,pr)
 
-lev_sep = "."
+#lev_sep = "."
 
 # Here are three functions that I'd love to see in Biopython but they
 # are not there (yet).
@@ -165,7 +165,7 @@ class PpaTree:
         except IOError:
             raise IOError()
       
-        clades = [r.split(lev_sep) for r in rows]
+        clades = [r.split(self.lev_sep) for r in rows]
 
         tree = BTree()
         tree.root = BClade()
@@ -208,7 +208,8 @@ class PpaTree:
         raise ValueError 
 
 
-    def __init__( self, filename, warnings = False ):
+    def __init__( self, filename, warnings = False, lev_sep = "." ):
+        self.lev_sep = lev_sep
         self.warnings = warnings
         if filename is None:
             self.tree = None
@@ -304,7 +305,9 @@ class PpaTree:
                                 #n,n,n,
                                 1.0)]
                 return []
+
             core,pv,intersection = self.is_core( clade, terminals, er = er )
+
             if core:
                 #ns = [terminals[ii] for ii in terminals_s if ii in clade.imgids]
                 return [( clname,
@@ -323,20 +326,23 @@ class PpaTree:
         
         def _add_full_paths_( clade, path ):
             lpath = path + ([clade.name] if clade.name else [])
-            clade.full_name = ".".join( lpath )
+            clade.full_name = self.lev_sep.join( lpath )
             for c in clade.clades:
                 _add_full_paths_( c, lpath )
         _add_full_paths_( self.tree.root, [] )
 
     def find_cores( self, cl_taxa_file, min_core_size = 1, error_rate = 0.95, subtree = None, skip_qm = True ):
         if subtree:
-            self.subtree( 'name', subtree ) 
+            self.subtree( 'name', subtree )
         self.ctc = {}
         imgids2terminals = {}
         for t in self.tree.get_terminals():
-            t.imgid = int(t.name[3:] if "t__"in t.name else t.name)
+            #t.imgid = t.name # if "t__"in t.name else t.name
+            t.imgid = t.name[3:] if "t__"in t.name else t.name # C2
+            #t.imgid = int(t.name[3:] if "t__"in t.name else t.name) # C2
             t.nterminals = 1
             imgids2terminals[t.imgid] = t
+
 
         # can be made faster with recursion
         for n in self.tree.get_nonterminals():
@@ -347,13 +353,15 @@ class PpaTree:
 
         ret = {}
         for vec in (l.strip().split('\t') for l in open(cl_taxa_file)):
-            sid = int(vec[0])
+            sid = vec[0]
+            #sid = int(vec[0]) # C2
             #tgts_l = [int(s) for s in vec[1:]]
             #tgts = dict([(s,tgts_l.count(s)) for s in set(tgts_l)])
-            tgts = set([int(s) for s in vec[1:]])
+            tgts = set([s for s in vec[1:]])
+            #tgts = set([int(s) for s in vec[1:]]) C2
 
             if len(tgts) >= min_core_size:
-                subtree_name = lev_sep.join(subtree.split(lev_sep)[:-1] ) if subtree else None
+                subtree_name = self.lev_sep.join(subtree.split(self.lev_sep)[:-1] ) if subtree else None
                 ret[sid] = self._find_core( tgts, er = error_rate, root_name = subtree, skip_qm = skip_qm )
                 #print sid #, ret[sid]
         return ret
@@ -366,7 +374,8 @@ class PpaTree:
         imgids2terminals = {}
         ids2clades = {}
         for t in self.tree.get_terminals():
-            t.imgid = int(t.name)
+            t.imgid = t.name
+            # t.imgid = int(t.name) # C2
             t.nterminals = 1
             imgids2terminals[t.imgid] = t
             ids2clades[t.name] = t
@@ -378,15 +387,19 @@ class PpaTree:
 
         self.add_full_paths() # unnecessary 
         
-        cus = dict([(int(l[0]),[int(ll) for ll in l[1:]]) for l in 
+        #cus = dict([(int(l[0]),[int(ll) for ll in l[1:]]) for l in # C2
+        cus = dict([(l[0],[ll for ll in l[1:]]) for l in 
                         (line.strip().split('\t') for line in open(cu_file))])
-        cinfo = dict([(int(v[0]),[v[1]] + [int(vv) for vv in v[2:6]] + [float(vv) for vv in v[6:]])
+        #cinfo = dict([(int(v[0]),[v[1]] + [int(vv) for vv in v[2:6]] + [float(vv) for vv in v[6:]]) # C2
+        cinfo = dict([(v[0],[v[1]] + [vv for vv in v[2:6]] + [float(vv) for vv in v[6:]])
                         for v in (line.strip().split('\t') for line in open(core_file))])
 
         ret = {}
         for vec in (l.strip().split('\t') for l in open(hitmap_file)):
-            sid = int(vec[0])
-            tgts_l = set([int(s) for s in vec[1:]])
+            sid = vec[0]
+            #sid = int(vec[0]) # C2
+            tgts_l = set([s for s in vec[1:]])
+            # tgts_l = set([int(s) for s in vec[1:]]) # C2
             lca = self.lca( cus[sid], ids2clades )
             if lca.is_terminal():
                 tin = set([lca.imgid])
@@ -401,7 +414,8 @@ class PpaTree:
             coreness = float( ci[-1] )
             cn_min, cp_max, cn_avg = [float(f) for f in ci[-4:-1]]
             gtax = ci[0]
-            cobs, ctot = int(ci[1]), int(ci[2])
+            cobs, ctot = ci[1], ci[2]
+            # cobs, ctot = int(ci[1]), int(ci[2]) # C2
             markerness = self.markerness( coreness, uniqueness, cn_min, cp_max, cn_avg )
             
             res_lin = [ gtax, markerness, coreness, uniqueness, cobs, ctot, cn_min, cp_max, cn_avg,
@@ -481,10 +495,10 @@ class PpaTree:
         node_path = list(self.tree.get_path(t))
         if not node_path or len(node_path) < 2:
             return None,None,None
-        tlevs = t2c[t].split(lev_sep)[2:-1]
+        tlevs = t2c[t].split(self.lev_sep)[2:-1]
         for p in node_path[-15:]:
             terms = list(p.get_terminals())
-            descn = [t2c[l.name].split(lev_sep)[2:-1] for l in  terms if l.name!=t]
+            descn = [t2c[l.name].split(self.lev_sep)[2:-1] for l in  terms if l.name!=t]
             if not descn or len(descn) < 2:
                 continue
 
@@ -493,7 +507,7 @@ class PpaTree:
             if len(set(descr_l)) == 1 and descr_l[0] != l and \
                 l != "s__sp_" and not l.endswith("unclassified") and \
                 descr_l[0] != "s__sp_" and not descr_l[0].endswith("unclassified"):
-                return p,terms,lev_sep.join(tlevs)
+                return p,terms,self.lev_sep.join(tlevs)
         return None,None,None
 
 
@@ -717,7 +731,7 @@ class PpaTree:
                 elif not clade.name:
                     lnam = nam
                 else:
-                    lnam = lev_sep.join( [nam, clade.name if clade.name else ""] ) 
+                    lnam = self.lev_sep.join( [nam, clade.name if clade.name else ""] ) 
                 ret += [lnam] if lnam else [] 
                 for c in clade.clades:
                     ret += rec_name(c,lnam) 

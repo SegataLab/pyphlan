@@ -34,7 +34,7 @@ if __name__ == "__main__":
     cscores = collections.defaultdict( set )
     fwmarkers = {} 
     maps = collections.defaultdict( set )
-    tree = ppa.PpaTree( args['taxonomy'] )
+    tree = ppa.PpaTree( args['taxonomy'],  lev_sep = "|" )
     clades2terms = ppa.clades2terms( tree.tree ) 
 
     clades2taxa = dict([(clade.full_name,set([-int(taxon.name[4:]) for taxon in taxa])) for clade,taxa in clades2terms.items()])
