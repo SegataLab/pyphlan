@@ -29,10 +29,10 @@ if __name__ == "__main__":
     #with (open(args['uc']) if args['uc'] else sys.stdin) as inp:
     with utils.openr(args['cg']) as inp:
         for line in (l.split('\t') for l in inp):
-            if int(line[0]) > 0:
-                gid,clade,ncore,ngenomes,pv =  line[:5]
-            else:
-                gid,clade,ncore,ngenomes,pv =  line[1:6]
+            #if int(line[0]) > 0:
+            gid,clade,ncore,ngenomes,pv =  line[:5]
+            #else:
+            #    gid,clade,ncore,ngenomes,pv =  line[1:6]
             gid2cores[gid].add( (clade,ncore,ngenomes,pv) )
 
     clades2cores = collections.defaultdict( set )
