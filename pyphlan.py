@@ -17,6 +17,8 @@ import sys
 
 #lev_sep = "."
 
+uncl = "?" 
+
 # Here are three functions that I'd love to see in Biopython but they
 # are not there (yet).
 def partial_branch_length(clade, selective_targets):
@@ -242,7 +244,7 @@ class PpaTree:
 
         add = 0
         for subclade in clade.clades:
-            if "?" in subclade.name:
+            if uncl in subclade.name:
                 out = subclade.imgids - intersection # targs  
                 add += len(out)
         if add and len_intersection >= add:
@@ -253,7 +255,7 @@ class PpaTree:
             return False, core, None
         nsubclades, nsubclades_absent = 0, 0
         for subclade in set(clade.get_nonterminals()) - set([clade]):
-            if "?" in subclade.full_name: # full??/
+            if uncl in subclade.full_name: # full??/
                 continue
             if subclade.nterminals == 1:
                 nsubclades += 1 # !!!
@@ -266,7 +268,7 @@ class PpaTree:
            
             sc_add = 0
             for sc_subclade in subclade.clades:
-                if "?" in sc_subclade.name:
+                if uncl in sc_subclade.name:
                     sc_out = sc_subclade.imgids - sc_intersection
                     sc_add += len(sc_out)
             if add and sc_len_intersection >= sc_add:
@@ -282,12 +284,15 @@ class PpaTree:
     def _find_core( self, terminals, er = 0.95, root_name = None, skip_qm = True ):
         #terminals_s = set(terminals)
         def _find_core_rec( clade ):
+            """
             if root_name:
                 #clname = lev_sep.join( [root_name]+clade.full_name.split(lev_sep)[1:] )
                 #clname = lev_sep.join( clade.full_name[1:] )
                 clname = clade.full_name
             else:
                 clname = clade.full_name
+            """
+            clname = clade.full_name
             if clade.is_terminal():
                 if clade.imgid in terminals:
                     #n = terminals[clade.imgid]
@@ -295,7 +300,7 @@ class PpaTree:
                                 #n,n,n,
                                 1.0)]
                 return []
-            if skip_qm and clade.name and "?" in clade.name:
+            if skip_qm and clade.name and uncl in clade.name:
                 return [] 
             if len(clade.imgids) == 1:
                 cimg = list(clade.imgids)[0]
