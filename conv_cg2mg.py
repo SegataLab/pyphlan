@@ -78,6 +78,37 @@ if __name__ == "__main__":
             last,lastv = "",[]
             outbuf = []
             gt = None
+
+            outtmp = [] 
+
+            for v in valin:
+                gt = v[0]
+                if last == gt:
+                    outtmp.append( v )
+                    continue
+                    
+                if len(outtmp) == 1:
+                    #print outtmp
+                    outbuf.append( outtmp[0] )
+                elif len(outtmp) > 1:
+                    #print outtmp
+                    outtmp2 = [o for o in outtmp if "_sp_" not in o[1]]
+                    if len(outtmp2) == 1:
+                        outbuf.append( outtmp2[0] )
+                    elif len(outtmp2) > 1:
+                        outtmp3 = sorted(outtmp2,key=lambda x:-int(x[2]))
+                        cur = int(outtmp3[0][2])
+                        other = sum([int(vv[2]) for vv in outtmp3[1:]])
+                        #print cur, other, outtmp3[0]
+                        if float(cur)/float(other) > 10 and float(other) < 6:
+                            outbuf.append( outtmp3[0] )
+                
+                last = gt
+                outtmp = [v]
+
+            if last and last != gt:
+                outbuf.append( lastv )
+            """
             for v in valin:
                 gt = v[0]
                 if last == gt:
@@ -89,6 +120,7 @@ if __name__ == "__main__":
                 lastv = v
             if last and last != gt:
                 outbuf.append( lastv )
+            """
             for v in outbuf:
                 fr = v[0]
                 frt = g2t[fr]
