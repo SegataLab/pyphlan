@@ -20,7 +20,7 @@ def read_params(args):
     arg( 'out_f', metavar='OUTPUT_FILE', nargs='?', default=None, type=str,
          help="the output fna file [stdout if not present]")
 
-    parser.add_argument('-l', metavar='Length of the prodiced reads', default=100, type = int )
+    parser.add_argument('-l', metavar='Length of the produced reads', default=100, type = int )
     parser.add_argument('-s', metavar='Step in sampling reads', default=20, type = int )
 
     return vars(parser.parse_args())
