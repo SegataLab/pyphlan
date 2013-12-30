@@ -100,7 +100,7 @@ if __name__ == "__main__":
                         cur = int(outtmp3[0][2])
                         other = sum([int(vv[2]) for vv in outtmp3[1:]])
                         #print cur, other, outtmp3[0]
-                        if float(cur)/float(other) > 10 and float(other) < 6:
+                        if float(cur)/float(other) > 2.5 and float(other) < 6:
                             outbuf.append( outtmp3[0] )
                 
                 last = gt
