@@ -3,7 +3,8 @@
 import sys
 import collections
 import utils
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
 import pyphlan as ppa  
 from Bio import SeqIO
 
@@ -19,16 +20,21 @@ def read_params( args ):
 
     p.add_argument( '--sam', required = True, default=None, type=str )
     p.add_argument( '--centroids', required = True, default=None, type=str )
+    #p.add_argument( '--centroids_cores', action='store_true' )
     p.add_argument( '--centroids_ffn', required = True, default=None, type=str )
     p.add_argument( '--lens', required = True, default=None, type=str )
     p.add_argument( '--g2c', required = True, default=None, type=str )
     p.add_argument( '--taxonomy', required = True, default=None, type=str )
     p.add_argument( '--out_markers', required = True, default=None, type=str )
     p.add_argument( '--out_ml', required = True, default=None, type=str )
+    p.add_argument( '--out', required = True, default=None, type=str )
+    p.add_argument( '--out_mpa_pkl', required = True, default=None, type=str )
     p.add_argument( '--out_m2c', required = True, default=None, type=str )
     p.add_argument( '--out_summary', required = True, default=None, type=str )
     p.add_argument( '--min_n_markers', default=10, type=int )
     p.add_argument( '--top_n_markers', default=200, type=int )
+    p.add_argument( '--score_th', default=100, type=int )
+    p.add_argument( '--include_strains', default=False, action = 'store_true' )
     return vars( p.parse_args() )
     
 if __name__ == "__main__":
@@ -39,13 +45,16 @@ if __name__ == "__main__":
     clades2terms = ppa.clades2terms( tree.tree )
     
     clades2taxa = dict([(clade.full_name,{'taxa':set([taxon.name[3:] for taxon in taxa]),'genes':set()}) for clade,taxa in clades2terms.items()])
-    
+    #ttab = 1 if args['centroids_cores'] else 2
+    #gtab = 0 if args['centroids_cores'] else 1
+    ttab = 2
+    gtab = 1
     genes2taxa, all_genes, all_reads = {}, set(), set()
     with open(args['centroids']) as inp:
         for line in (l.split('\t') for l in inp):
-            taxon = line[2]
-            gene = line[1]
-            genes2taxa[line[1]] = taxon
+            taxon = line[ttab]
+            gene = line[gtab]
+            genes2taxa[line[gtab]] = taxon
             all_genes.add( gene )
             clades2taxa[taxon]['genes'].add(gene)
 
@@ -112,7 +121,6 @@ if __name__ == "__main__":
     for gene,taxon in genes2taxa.items():
         if gene not in genes2genomes:
             continue
-        
         int_genomes = set(clades2taxa[taxon]['taxa'])
         genomes_hit = set(genes2genomes[gene])
         int_genomes_hit = int_genomes & genomes_hit
@@ -128,13 +136,13 @@ if __name__ == "__main__":
         if ffn_len[gene] < 750:
             len_penlen_pen = 2
         
-        score = n_ext_genompes_hit + len_pen
+        score = n_ext_genomes_hit + len_pen
         score += 5.0*float( n_int_genomes-n_int_genomes_hit ) / float(n_int_genomes) 
 
         if taxon not in res:
             res[taxon] = {}
 
-        if score > 100:
+        if score > args['score_th']:
             continue
 
         res[taxon][gene] = { 'score' : score, 'ext' : ext_genomes_hit }
@@ -149,26 +157,54 @@ if __name__ == "__main__":
 
     
     markers_ffn = []
-
+    to_pkl = {'markers':{}}
     with open( args['out_summary'], "w" ) as outf:
-        for taxon, markers in res.items():
-            if "t__" in taxon:
-                continue
-            if len(markers) < args['min_n_markers']:
-                continue
-            outf.write( "\t".join( [str(taxon), str(len(markers))] ) +"\n" )
-            for marker, marker_v in markers.items():
-                res[taxon][marker]['seq'] = ffn[marker]
-                markers_ffn.append( ffn[marker] )
-                selected_markers.add( ffn[marker].id  )
+        with open( args['out'], "w" ) as out:
+            for taxon, markers in res.items():
+                if not args['include_strains']  and "t__" in taxon:
+                    continue
+                if len(markers) < args['min_n_markers']:
+                    continue
+                outf.write( "\t".join( [str(taxon), str(len(markers))] ) +"\n" )
+
+                for marker, marker_v in markers.items():
+                    out.write( "\t".join([  marker,
+                                            #taxon,
+                                            genes2taxa[marker].split("|")[-1],
+                                            str( ffn_len[marker]),
+                                            str(marker_v['score']),
+                                            str(len(marker_v['ext'])),
+                                            str(",".join(marker_v['ext'])),
+                                            ])
+                                            +"\n" )
+                    to_pkl['markers'][marker] = {   'taxon':taxon,
+                                                    'clade':genes2taxa[marker].split("|")[-1],
+                                                    'len': ffn_len[marker],
+                                                    'score': marker_v['score'],
+                                                    'ext': marker_v['ext'] }
+
+                    res[taxon][marker]['seq'] = ffn[marker]
+                    markers_ffn.append( ffn[marker] )
+                    selected_markers.add( ffn[marker].id  )
     
     SeqIO.write( markers_ffn, args['out_markers'], "fasta")
+
+    to_pkl['markers']['taxonomy'] = [l.strip() for l in open(args['taxonomy'])]
+
+    #with open(args['out_mpa_pkl'], 'wb') as out:
+    #   bz2.compress(pickle.dump(to_pkl, out, pickle.HIGHEST_PROTOCOL))
+    out = bz2.BZ2File(args['out_mpa_pkl'],"wb")
+    pickle.dump(to_pkl, out, pickle.HIGHEST_PROTOCOL)
+    out.close()
+
+
+
 
     #with open( args['out_ml'], "w" ) as outf:
     with open( args['out_ml'], "w" ) as out_ml:
         with open( args['out_m2c'], "w" ) as out_m2c:
             for k,v in ffn_len.items():
-                if "t__" in genes2taxa[k]:
+                if not args['include_strains'] and "t__" in genes2taxa[k]:
                     continue
                 if k not in selected_markers:
                     continue
