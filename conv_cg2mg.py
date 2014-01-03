@@ -92,7 +92,7 @@ if __name__ == "__main__":
                     outbuf.append( outtmp[0] )
                 elif len(outtmp) > 1:
                     #print outtmp
-                    outtmp2 = [o for o in outtmp if "_sp_" not in o[1]]
+                    outtmp2 = [o for o in outtmp if "_sp_" not in o[1] and "_bacterium_" in o[1] and "_unclass" in o[1]]
                     if len(outtmp2) == 1:
                         outbuf.append( outtmp2[0] )
                     elif len(outtmp2) > 1:
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                         cur = int(outtmp3[0][2])
                         other = sum([int(vv[2]) for vv in outtmp3[1:]])
                         #print cur, other, outtmp3[0]
-                        if float(cur)/float(other) > 2.5 and float(other) < 6:
+                        if float(cur)/float(other) > 2.5 and float(other) < 10:
                             outbuf.append( outtmp3[0] )
                 
                 last = gt
