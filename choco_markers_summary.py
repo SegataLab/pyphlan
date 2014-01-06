@@ -17,7 +17,7 @@ except ImportError:
 def read_params( args ):
     p = ap.ArgumentParser(description='Profile ChocoPhlAn genes\n')
 
-    p.add_argument( '--in', required = True, default=None, type=str )
+    p.add_argument( '--inp', required = True, default=None, type=str )
     p.add_argument( '--taxonomy', required = True, default=None, type=str )
     return vars( p.parse_args() )
     
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     
     tree = ppa.PpaTree( args['taxonomy'],  lev_sep = "|" )
 
-    with open( args['in'] ) as inp:
+    with open( args['inp'] ) as inp:
         markers = dict([(line[0],int(line[1])) for line in (l.strip().split('\t') for l in inp)])
 
 

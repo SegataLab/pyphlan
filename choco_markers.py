@@ -32,6 +32,7 @@ def read_params( args ):
     p.add_argument( '--out_m2c', required = True, default=None, type=str )
     p.add_argument( '--out_summary', required = True, default=None, type=str )
     p.add_argument( '--min_n_markers', default=10, type=int )
+    p.add_argument( '--min_n_markers_strains', default=20, type=int )
     p.add_argument( '--top_n_markers', default=200, type=int )
     p.add_argument( '--score_th', default=100, type=int )
     p.add_argument( '--include_strains', default=False, action = 'store_true' )
@@ -145,6 +146,9 @@ if __name__ == "__main__":
         if score > args['score_th']:
             continue
 
+        if "t__" in taxon and score > 0:
+            continue
+
         res[taxon][gene] = { 'score' : score, 'ext' : ext_genomes_hit }
 
 
@@ -163,8 +167,12 @@ if __name__ == "__main__":
             for taxon, markers in res.items():
                 if not args['include_strains']  and "t__" in taxon:
                     continue
-                if len(markers) < args['min_n_markers']:
+                if args['include_strains']  and "t__" in taxon:
+                    if len(markers) < args['min_n_markers_strains']:
+                        continue
+                if "t__"  not in taxon and len(markers) < args['min_n_markers']:
                     continue
+                
                 outf.write( "\t".join( [str(taxon), str(len(markers))] ) +"\n" )
 
                 for marker, marker_v in markers.items():
@@ -189,7 +197,7 @@ if __name__ == "__main__":
     
     SeqIO.write( markers_ffn, args['out_markers'], "fasta")
 
-    to_pkl['markers']['taxonomy'] = [l.strip() for l in open(args['taxonomy'])]
+    to_pkl['taxonomy'] = [l.strip() for l in open(args['taxonomy'])]
 
     #with open(args['out_mpa_pkl'], 'wb') as out:
     #   bz2.compress(pickle.dump(to_pkl, out, pickle.HIGHEST_PROTOCOL))
