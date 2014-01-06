@@ -92,7 +92,7 @@ if __name__ == "__main__":
                     outbuf.append( outtmp[0] )
                 elif len(outtmp) > 1:
                     #print outtmp
-                    outtmp2 = [o for o in outtmp if "_sp_" not in o[1] and "_bacterium_" in o[1] and "_unclass" in o[1]]
+                    outtmp2 = [o for o in outtmp if "_sp_" not in o[1] and "_bacterium_" not in o[1] and "_unclass" not in o[1]]
                     if len(outtmp2) == 1:
                         outbuf.append( outtmp2[0] )
                     elif len(outtmp2) > 1:
