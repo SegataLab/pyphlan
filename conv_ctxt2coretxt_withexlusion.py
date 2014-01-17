@@ -166,9 +166,9 @@ if __name__ == "__main__":
    
                 if args['out_taxa']:
                     #out.write( "\t".join([str(g2t[s]) for s in valin]) +"\n" ) 
-                    out.write( "\t".join([str(g2t[s]) for s in genes2taxa.keys()]) +"\n" ) 
+                    out.write( "\t".join([str(s) for s in genes2taxa.keys()]) +"\n" ) 
                 else:    
-                    out.write( "\t".join([str(s) for s in genes2taxa.keys()]) +"\n" )
+                    out.write( "\t".join([str(s[0]) for s in genes2taxa.values()]) +"\n" )
 
 
 
