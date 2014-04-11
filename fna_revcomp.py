@@ -10,6 +10,7 @@ import random as rnd
 rnd.seed(1982)
 import utils
 from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='Split/Select/Randomize/Subsample a multi fasta file')
@@ -21,18 +22,19 @@ def read_params(args):
 
     parser.add_argument('-r','--reverse', action='store_true', help="Invert selection\n")
     parser.add_argument('-c','--complement', action='store_true', help="Invert selection\n")
+    parser.add_argument('-p', action='store_true', help="Only for even samples\n")
 
     return vars(parser.parse_args())
 
 def revcomp( par ):
-
+    p = par['p']
     with utils.openw( par['out_f'] ) as outf:
         if par['complement'] and par['reverse']:
-            res = (r.reverse_complement(id=r.id,description="RC") for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"))
+            res = ((SeqRecord(r.seq.reverse_complement(),id=r.id,description="RC") if not p or i % 2 == 1 else r) for i,r in enumerate(SeqIO.parse( utils.openr(par['inp_f']), "fasta")))
         elif par['reverse']:
-            res = (r.reverse(id=r.id,description="R") for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"))
+            res = ((SeqRecord(r.seq[::-1],id=r.id,description="R") if not p or i % 2 == 1 else r) for i,r in enumerate(SeqIO.parse( utils.openr(par['inp_f']), "fasta")))
         elif par['complement']:
-            res = (r.complement(id=r.id,description="C") for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"))
+            res = ((SeqRecord(r.seq.complement(),id=r.id,description="C") if not p or i % 2 == 1 else r) for i,r in enumerate(SeqIO.parse( utils.openr(par['inp_f']), "fasta")))
         else:
             res = []
 
