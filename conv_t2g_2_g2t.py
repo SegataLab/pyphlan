@@ -29,9 +29,11 @@ if __name__ == "__main__":
 
     with utils.openr( args['t2g'] ) as inp:
         for ll in (l.strip().split('\t') for l in inp):
-            to = int(ll[0])
+            #to = int(ll[0])
+            to = ll[0]
             for g in ll[1:]:
-                g2t[int(g)] = to 
+                #g2t[int(g)] = to 
+                g2t[g] = to 
     
     with utils.openw(args['g2t']) as out:
         for g,t in g2t.iteritems():

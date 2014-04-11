@@ -22,7 +22,8 @@ def read_params(args):
     return vars(parser.parse_args())
 
 def genome_id( fn ):
-    return str(-int(os.path.basename(fn).split(".")[0]))
+    #return str(-int(os.path.basename(fn).split(".")[0]))
+    return os.path.basename(fn).split(".")[0]
 
 if __name__ == '__main__':
     par = read_params(sys.argv)

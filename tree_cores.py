@@ -30,6 +30,8 @@ def read_params( args ):
             default=0.95, type=float )
     p.add_argument('-s', metavar="Subtree of interest",
             default=None, type=str )
+    p.add_argument('--lev_sep', metavar="Taxonomic level separator",
+            default=".", type=str )
     p.add_argument('--skip_qm', metavar="Whether to skip question mark clades or not",
             default=1, type=int )
 
@@ -38,7 +40,7 @@ def read_params( args ):
 
 if __name__ == "__main__":
     args = read_params( sys.argv )
-    tree = ppa.PpaTree( args['intree'] )
+    tree = ppa.PpaTree( args['intree'], lev_sep = args['lev_sep'] )
     cores = tree.find_cores(args['f'], error_rate = args['e'], subtree = args['s'], skip_qm = args['skip_qm'])
 
     with utils.openw( args['outfile'] ) as outf:

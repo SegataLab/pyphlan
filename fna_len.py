@@ -19,6 +19,8 @@ def read_params(args):
          help="the input fna file [stdin if not present]")
     arg( 'out_f', metavar='OUTPUT_FILE', nargs='?', default=None, type=str,
          help="the output txt file [stdout if not present]")
+    arg( '-q', action='store_true', 
+         help="set this for fastq")
     arg( '-t','--total', action='store_true', help="Print only the sum of the length of all sequences\n") 
     return vars(parser.parse_args())
 
@@ -27,7 +29,7 @@ if __name__ == '__main__':
 
     ltot = 0
     with utils.openw( par['out_f'] ) as outf:
-        for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"):
+        for r in SeqIO.parse( utils.openr(par['inp_f']), "fastq" if par['q'] else "fasta"):
             l = len(r.seq)
             if par['total']:
                 ltot += l
