@@ -52,7 +52,7 @@ def blast_ncbi_outfmt6_screen(par):
         if par['s'] == 'pid':
             col = par['pid']-1
         elif par['s'] == 'evalue':
-            col = par['evalue_col']-1
+            col = par['evalue_col']
         elif par['s'] == 'length':
             col = par['length_col']-1
         elif par['s'] == 'bitscore':

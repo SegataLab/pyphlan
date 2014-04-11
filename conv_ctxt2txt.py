@@ -23,9 +23,11 @@ def read_params( args ):
     p.add_argument('--subsample', metavar="Subsampling rate",
             default=1.0, type=float )
     p.add_argument('-n', metavar="Minimum number of matching taxa",
-            default=0, type=int )
+            default=None, type=int )
     p.add_argument('-m', metavar="Minimum number of matching taxa",
             default=0, type=int )
+    p.add_argument('-M', metavar="Minimum number of matching taxa",
+            default=None, type=int )
     p.add_argument('-p', metavar="Prefix for taxon names",
             default="", type=str )
     p.add_argument('--sk', action='store_true' )
@@ -71,10 +73,23 @@ if __name__ == "__main__":
         n = len(res.values()[0])
         n_s = int(float(n)*args['subsample'])
         indok = set(random.sample( list(range(n)), n_s))
+
+        torem = set()
+        if not args['s'] and args['m']:
+            torem = set([i for i,l in enumerate(zip(*res.values())) if sum(l) < args['m'] or ( args['M'] is not None and sum(l) >= args['M']) ])
         if args['original_gene_names']:
-            out.write( "\t".join(['genes']+[kin[v] for v in range(n)]) + "\n" )
+            out.write( "\t".join(['genes']+[kin[v] for v in range(n) if v not in torem]) + "\n" )
         else:
-            out.write( "\t".join(['genes']+["g"+str(v) for v in range(n)]) + "\n" )
+            out.write( "\t".join(['genes']+["g"+str(v) for v in range(n) if v not in torem]) + "\n" )
 
         for k,v in res.items():
-            out.write( args['p'] + str(k)+"\t"+"\t".join([str(s) for i,s in enumerate(v) if i in indok]) +"\n" )
+            out.write( args['p'] + str(k)+"\t"+"\t".join([str(s) for i,s in enumerate(v) if i in indok and i not in torem]) +"\n" )
+
+
+
+
+
+
+
+
+
