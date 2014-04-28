@@ -13,5 +13,5 @@ if __name__ == '__main__':
 	min_len = args['min_len']
 	with sys.stdout as outf:
 		for r in SeqIO.parse(sys.stdin, "fastq"):
-			if len(r) > min_len:
+			if len(r) >= min_len:
 				SeqIO.write(r, outf, "fastq")
