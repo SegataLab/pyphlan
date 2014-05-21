@@ -79,7 +79,7 @@ class ooSubprocess:
 		else:
 			return subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = a_cwd)
 	
-	def change_ext(self, ifn, old_ext, new_ext):
+	def replace_ext(self, ifn, old_ext, new_ext):
 		#if not os.path.isfile(ifn):
 		#	print 'Error: file %s does not exist!'%(ifn)
 		#	exit(1)
