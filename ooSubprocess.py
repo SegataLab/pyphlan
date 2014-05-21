@@ -38,7 +38,7 @@ class ooSubprocess:
 			if get_output:
 				return subprocess.check_output(cmd, cwd = a_cwd)
 			else:
-				return subprocess.check_call(cmd, cwd = a_cwd)
+				return subprocess.call(cmd, cwd = a_cwd)
 
 
 	def chain(self, prog, args = [], out_fn = None, stop = False, in_proc = None, get_output = False, a_cwd = None, verbose = True):
@@ -75,7 +75,7 @@ class ooSubprocess:
 			if get_output:
 				return subprocess.check_output(cmd, stdout = ofile, stdin = in_pipe, cwd = a_cwd)
 			else:
-				return subprocess.check_call(cmd, stdout = ofile, stdin = in_pipe, cwd = a_cwd)
+				return subprocess.call(cmd, stdout = ofile, stdin = in_pipe, cwd = a_cwd)
 		else:
 			return subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = a_cwd)
 	
@@ -93,3 +93,7 @@ class ooSubprocess:
 
 	def ftmp(self, ifn):
 		return os.path.join(self.tmp_dir, os.path.basename(ifn))
+
+	def fdir(self, dir, ifn):
+		return os.path.join(dir, os.path.basename(ifn))
+
