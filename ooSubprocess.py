@@ -107,5 +107,6 @@ class ooSubprocess:
 		return base, ext
 	
 	def parallelize(self, func, args, nprocs = 1):
-		pool = multiprocessing.Pool(5)	
-
+		pool = multiprocessing.Pool(nprocs)	
+		return pool.map(func, args)
+		#return [func(args[0])]
