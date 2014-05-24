@@ -96,4 +96,12 @@ class ooSubprocess:
 
 	def fdir(self, dir, ifn):
 		return os.path.join(dir, os.path.basename(ifn))
+	
+	def splitext(self, ifn):
+		base, ext = os.path.splitext(ifn)
+		base1, ext1 = os.path.splitext(base)
+		if ext1 == '.tar':
+			base = base1
+			ext = ext1 + ext
+		return base, ext
 
