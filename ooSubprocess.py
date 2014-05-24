@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import subprocess
 import os
+import multiprocessing 
 
 class ooSubprocess:
 	def __init__(self, a_tmp_dir = 'tmp/'):
@@ -104,4 +105,7 @@ class ooSubprocess:
 			base = base1
 			ext = ext1 + ext
 		return base, ext
+	
+	def parallelize(self, func, args, nprocs = 1):
+		pool = multiprocessing.Pool(5)	
 
