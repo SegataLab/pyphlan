@@ -111,12 +111,13 @@ class ooSubprocess:
 		pool = multiprocessing.Pool(nprocs)	
 		return pool.map(func, args)
 
-		'''
+	
+	def serialize(self, func, args):
 		result = []
 		for arg in args:
 			result.append(func(arg))
 		return result
-		'''
+
 
 def print_stderr(*args):
 		sys.stderr.write(' '.join(map(str,args)) + '\n')
