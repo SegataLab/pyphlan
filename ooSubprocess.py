@@ -5,10 +5,10 @@ import multiprocessing
 import sys
 
 class ooSubprocess:
-	def __init__(self, a_tmp_dir = 'tmp/'):
+	def __init__(self, tmp_dir = 'tmp/'):
 		self.chain_cmds = []
-		self.tmp_dir = a_tmp_dir
-		self.mkdir(a_tmp_dir)
+		self.tmp_dir = tmp_dir
+		self.mkdir(tmp_dir)
 		
 	def mkdir(self, dir):
 		if not os.path.exists(dir):
