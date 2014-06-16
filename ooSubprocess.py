@@ -109,7 +109,10 @@ class ooSubprocess:
 	
 	def parallelize(self, func, args, nprocs = 1):
 		pool = multiprocessing.Pool(nprocs)	
-		return pool.map(func, args)
+		results = pool.map(func, args)
+		pool.close()
+		pool.join()
+		return results
 
 	
 	def serialize(self, func, args):
