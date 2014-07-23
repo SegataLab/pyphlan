@@ -3,6 +3,8 @@
 import sys
 import Bio
 from Bio import SeqIO	
+import argparse as ap
+
 
 def get_length(ifn):
 	length = 0
