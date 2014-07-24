@@ -11,6 +11,6 @@ def read_params(args):
 	
 if __name__ == '__main__':
 	args = read_params(sys.argv)
-	with open(ofn, 'w') as ofile:
-		for r in SeqIO.parse(ifn, "fastq"):
+	with open(args['ofn'], 'w') as ofile:
+		for r in SeqIO.parse(args['ifn'], "fastq"):
 			SeqIO.write(r, ofile, "fasta")
