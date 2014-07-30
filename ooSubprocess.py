@@ -12,15 +12,8 @@ class ooSubprocess:
 	def __init__(self, tmp_dir = 'tmp/'):
 		self.chain_cmds = []
 		self.tmp_dir = tmp_dir
-		self.mkdir(tmp_dir)
+		mkdir(tmp_dir)
 		
-	def mkdir(self, dir):
-		if not os.path.exists(dir):
-			os.makedirs(dir)
-		elif not os.path.isdir(dir):
-			print_stderr('Error: %s is not a directory!'%dir)
-			exit(1)
-
 	def ex(self, prog, args = [], out_fn = None, get_output = False, a_cwd = None, verbose = True):
 		if type(args) is str:
 			args = args.split()
@@ -85,51 +78,70 @@ class ooSubprocess:
 		else:
 			return subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = a_cwd)
 	
-	def replace_ext(self, ifn, old_ext, new_ext):
-		#if not os.path.isfile(ifn):
-		#	print_stderr('Error: file %s does not exist!'%(ifn))
-		#	exit(1)
-		if ifn[len(ifn) - len(old_ext):] != old_ext:
-			#print_stderr('Error: the old file extension %s does not match!'%old_ext)
-			#exit(1)
-			new_ifn = ifn + new_ext
-		else:
-			new_ifn = ifn[:len(ifn) - len(old_ext)] + new_ext
-		return new_ifn
-
 	def ftmp(self, ifn):
 		return os.path.join(self.tmp_dir, os.path.basename(ifn))
 
-	def fdir(self, dir, ifn):
-		return os.path.join(dir, os.path.basename(ifn))
-	
-	def splitext(self, ifn):
-		base, ext = os.path.splitext(ifn)
-		base1, ext1 = os.path.splitext(base)
-		if ext1 == '.tar':
-			base = base1
-			ext = ext1 + ext
-		return base, ext
-	
-	def parallelize(self, func, args, nprocs = 1):
-		pool = multiprocessing.Pool(nprocs)	
-		results = pool.map(func, args)
-		pool.close()
-		pool.join()
-		return results
 
-	
-	def serialize(self, func, args):
-		result = []
-		for arg in args:
-			result.append(func(arg))
-		return result
+def fdir(dir, ifn):
+	return os.path.join(dir, os.path.basename(ifn))
+
+
+def mkdir(dir):
+	if not os.path.exists(dir):
+		os.makedirs(dir)
+	elif not os.path.isdir(dir):
+		print_stderr('Error: %s is not a directory!'%dir)
+		exit(1)
+
+
+def replace_ext(ifn, old_ext, new_ext):
+	#if not os.path.isfile(ifn):
+	#	print_stderr('Error: file %s does not exist!'%(ifn))
+	#	exit(1)
+	if ifn[len(ifn) - len(old_ext):] != old_ext:
+		#print_stderr('Error: the old file extension %s does not match!'%old_ext)
+		#exit(1)
+		new_ifn = ifn + new_ext
+	else:
+		new_ifn = ifn[:len(ifn) - len(old_ext)] + new_ext
+	return new_ifn
+
+
+def splitext(ifn):
+	base, ext = os.path.splitext(ifn)
+	base1, ext1 = os.path.splitext(base)
+	if ext1 in ['.tar', '.fastq', '.fasta']:
+		base = base1
+		ext = ext1 + ext
+	return base, ext
+
+
+def splitext2(ifn):
+	basename = os.path.basename(ifn)
+	base, ext = splitext(basename)
+	return base, ext
+
+
+def parallelize(func, args, nprocs = 1):
+	pool = multiprocessing.Pool(nprocs)	
+	results = pool.map(func, args)
+	pool.close()
+	pool.join()
+	return results
+
+
+def serialize(func, args):
+	result = []
+	for arg in args:
+		result.append(func(arg))
+	return result
 
 
 def print_stderr(*args):
 		sys.stderr.write(' '.join(map(str,args)) + '\n')
 		sys.stderr.flush()
 	
+
 def print_stdout(*args):
 		sys.stdout.write(' '.join(map(str,args)) + '\n')
 		sys.stdout.flush()
