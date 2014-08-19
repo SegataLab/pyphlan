@@ -6,7 +6,7 @@ from Bio import SeqIO
 import argparse as ap
 
 
-def get_length(ifn):
+def get_genome_length(ifn):
 	length = 0
 	for contig in SeqIO.parse(ifn, 'fasta'):
 		length += len(contig.seq)
@@ -19,4 +19,4 @@ def read_params(args):
 	
 if __name__ == '__main__':
 	args = read_params(sys.argv)
-	print get_length(args['ifn'])
+	print get_genome_length(args['ifn'])
