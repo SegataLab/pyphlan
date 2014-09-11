@@ -22,24 +22,24 @@ class ooSubprocess:
 			args = [args]
 
 		cmd = [prog] + args
-		print_cmd = ' '.join(cmd)
-		if out_fn:
-			if verbose:
-				print_stderr('ooSubprocess: ' + print_cmd + ' > ' + out_fn)
-			ofile = open(out_fn, 'w')
-			if get_output:
-				return subprocess.check_output(cmd, stdout = ofile, cwd = a_cwd)
-			else:
-				return subprocess.check_call(cmd, stdout = ofile, cwd = a_cwd)
+		print_cmd = 'ooSubprocess: ' + ' '.join(cmd)
+		if verbose and out_fn and (not get_output):
+			print_stderr(print_cmd + ' > ' + out_fn)
+		elif verbose:
+			print_stderr(print_cmd)
+
+		if get_output:
+			result = subprocess.check_output(cmd, cwd = a_cwd)
+		elif out_fn:
+			ofile = open(out_fn, 'w') if out_fn else None
+			result = subprocess.check_call(cmd, stdout = ofile, cwd = a_cwd)
+			ofile.close()
 		else:
-			if verbose:
-				print_stderr('ooSubprocess: ' + print_cmd)
-			if get_output:
-				return subprocess.check_output(cmd, cwd = a_cwd)
-			else:
-				return subprocess.check_call(cmd, cwd = a_cwd)
+			result = subprocess.check_call(cmd, cwd = a_cwd)
+		return result
 
 
+		
 	def chain(self, prog, args = [], out_fn = None, stop = False, in_proc = None, get_output = False, a_cwd = None, verbose = True):
 		if in_proc is None and self.chain_cmds != []:
 			print_stderr('Error: the pipeline was not stopped before creating a new one!')
@@ -57,7 +57,7 @@ class ooSubprocess:
 		cmd = [prog] + args
 
 		print_cmd = ' '.join(cmd)
-		if out_fn: print_cmd += ' > ' + out_fn
+		if out_fn and (not get_output): print_cmd += ' > ' + out_fn
 		self.chain_cmds.append(print_cmd)
 
 		in_pipe = in_proc.stdout if in_proc else None
@@ -70,13 +70,17 @@ class ooSubprocess:
 				print_stderr('ooSubprocess: ' + ' | '.join(self.chain_cmds))
 				
 			self.chain_cmds = []
-			ofile = open(out_fn, 'w') if out_fn else None
 			if get_output:
-				return subprocess.check_output(cmd, stdout = ofile, stdin = in_pipe, cwd = a_cwd)
+				result = subprocess.check_output(cmd, stdin = in_pipe, cwd = a_cwd)
+			elif out_fn:
+				ofile = open(out_fn, 'w')
+				result = subprocess.check_call(cmd, stdout = ofile, stdin = in_pipe, cwd = a_cwd)
+				ofile.close()
 			else:
-				return subprocess.check_call(cmd, stdout = ofile, stdin = in_pipe, cwd = a_cwd)
+				result = subprocess.check_call(cmd, stdin = in_pipe, cwd = a_cwd)
 		else:
-			return subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = a_cwd)
+			result = subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = a_cwd)
+		return result
 	
 	def ftmp(self, ifn):
 		return os.path.join(self.tmp_dir, os.path.basename(ifn))
