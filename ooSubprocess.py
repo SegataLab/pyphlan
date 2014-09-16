@@ -127,18 +127,21 @@ def splitext2(ifn):
 
 
 def parallelize(func, args, nprocs = 1):
-	pool = multiprocessing.Pool(nprocs)	
-	results = pool.map(func, args)
-	pool.close()
-	pool.join()
+	if nprocs > 1:
+		pool = multiprocessing.Pool(nprocs)	
+		results = pool.map(func, args)
+		pool.close()
+		pool.join()
+	else:
+		results = serialize(func, args)
 	return results
 
 
 def serialize(func, args):
-	result = []
+	results = []
 	for arg in args:
-		result.append(func(arg))
-	return result
+		results.append(func(arg))
+	return results
 
 
 def print_stderr(*args):
