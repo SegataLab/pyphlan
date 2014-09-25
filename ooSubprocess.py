@@ -18,18 +18,20 @@ class ooSubprocess:
         mkdir(tmp_dir)
 
     def ex(
-                self,
-                prog,
-                args=[],
-                out_fn=None,
-                get_output=False,
-                current_dir=None,
-                verbose=True):
+            self,
+            prog,
+            args=[],
+            get_output=False,
+            get_out_pipe=False,
+            out_fn=None,
+            in_pipe=None,
+            current_dir=None,
+            verbose=True):
 
-        if type(args) is str:
+        if isinstance(args, str):
             args = args.split()
 
-        if type(args) is not list:
+        if not isinstance(args, list):
             args = [args]
 
         cmd = [prog] + args
@@ -40,26 +42,31 @@ class ooSubprocess:
             print_stderr(print_cmd)
 
         if get_output:
-            result = subprocess.check_output(cmd, cwd=current_dir)
+            result = subprocess.check_output(
+                cmd,
+                cwd=current_dir,
+                stdin=in_pipe)
+        elif get_out_pipe:
+            result = subprocess.Popen(cmd, stdin=in_pipe, stdout=subprocess.PIPE, cwd=current_dir).stdout
         elif out_fn:
             ofile = open(out_fn, 'w') if out_fn else None
-            result = subprocess.check_call(cmd, stdout=ofile, cwd=current_dir)
+            result = subprocess.check_call(cmd, stdin=in_pipe, stdout=ofile, cwd=current_dir)
             ofile.close()
         else:
-            result = subprocess.check_call(cmd, cwd=current_dir)
+            result = subprocess.check_call(cmd, stdin=in_pipe, cwd=current_dir)
         return result
 
     def chain(
-                self,
-                prog,
-                args=[],
-                out_fn=None,
-                stop=False,
-                in_pipe=None,
-                get_output=False,
-                get_pipe_out=False,
-                current_dir=None,
-                verbose=True):
+            self,
+            prog,
+            args=[],
+            stop=False,
+            in_pipe=None,
+            get_output=False,
+            get_out_pipe=False,
+            out_fn=None,
+            current_dir=None,
+            verbose=True):
 
         if in_pipe is None and self.chain_cmds != []:
             print_stderr(
@@ -71,10 +78,10 @@ class ooSubprocess:
                 'Error: out_fn (output_file_name) is only specified when stop = True!')
             exit(1)
 
-        if type(args) is str:
+        if isinstance(args, str):
             args = args.split()
 
-        if type(args) is not list:
+        if not isinstance(args, list):
             args = [args]
         cmd = [prog] + args
 
@@ -90,22 +97,40 @@ class ooSubprocess:
 
             if verbose:
                 print_stderr('ooSubprocess: ' + ' | '.join(self.chain_cmds))
-                
+
             self.chain_cmds = []
             if get_output:
-                result = subprocess.check_output(cmd, stdin = in_pipe, cwd = current_dir)
+                result = subprocess.check_output(
+                    cmd,
+                    stdin=in_pipe,
+                    cwd=current_dir)
+            elif get_out_pipe:
+                result = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stdin=in_pipe,
+                    cwd=current_dir).stdout
             elif out_fn:
                 ofile = open(out_fn, 'w')
-                result = subprocess.check_call(cmd, stdout = ofile, stdin = in_pipe, cwd = current_dir)
+                result = subprocess.check_call(
+                    cmd,
+                    stdout=ofile,
+                    stdin=in_pipe,
+                    cwd=current_dir)
                 ofile.close()
-            elif get_pipe_out:
-                result = subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = current_dir).stdout
             else:
-                result = subprocess.check_call(cmd, stdin = in_pipe, cwd = current_dir)
+                result = subprocess.check_call(
+                    cmd,
+                    stdin=in_pipe,
+                    cwd=current_dir)
         else:
-            result = subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = in_pipe, cwd = current_dir).stdout
+            result = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stdin=in_pipe,
+                cwd=current_dir).stdout
         return result
-    
+
     def ftmp(self, ifn):
         return os.path.join(self.tmp_dir, os.path.basename(ifn))
 
@@ -118,7 +143,7 @@ def mkdir(dir):
     if not os.path.exists(dir):
         os.makedirs(dir)
     elif not os.path.isdir(dir):
-        print_stderr('Error: %s is not a directory!'%dir)
+        print_stderr('Error: %s is not a directory!' % dir)
         exit(1)
 
 
@@ -150,9 +175,9 @@ def splitext2(ifn):
     return base, ext
 
 
-def parallelize(func, args, nprocs = 1):
+def parallelize(func, args, nprocs=1):
     if nprocs > 1:
-        pool = multiprocessing.Pool(nprocs)    
+        pool = multiprocessing.Pool(nprocs)
         results = pool.map(func, args)
         pool.close()
         pool.join()
@@ -169,12 +194,10 @@ def serialize(func, args):
 
 
 def print_stderr(*args):
-        sys.stderr.write(' '.join(map(str,args)) + '\n')
-        sys.stderr.flush()
-    
+    sys.stderr.write(' '.join(map(str, args)) + '\n')
+    sys.stderr.flush()
+
 
 def print_stdout(*args):
-        sys.stdout.write(' '.join(map(str,args)) + '\n')
-        sys.stdout.flush()
-    
-
+    sys.stdout.write(' '.join(map(str, args)) + '\n')
+    sys.stdout.flush()
