@@ -6,6 +6,7 @@
 import subprocess
 import os
 import multiprocessing
+from multiprocessing.pool import ThreadPool
 import sys
 import cStringIO
 
@@ -175,9 +176,12 @@ def splitext2(ifn):
     return base, ext
 
 
-def parallelize(func, args, nprocs=1):
+def parallelize(func, args, nprocs=1, use_threads=False):
     if nprocs > 1:
-        pool = multiprocessing.Pool(nprocs)
+        if use_threads:
+            pool = ThreadPool(nprocs)
+        else:
+            pool = multiprocessing.Pool(nprocs)
         results = pool.map(func, args)
         pool.close()
         pool.join()
