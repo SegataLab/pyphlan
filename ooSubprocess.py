@@ -164,7 +164,7 @@ def replace_ext(ifn, old_ext, new_ext):
 def splitext(ifn):
     base, ext = os.path.splitext(ifn)
     base1, ext1 = os.path.splitext(base)
-    if ext1 in ['.tar', '.fastq', '.fasta']:
+    if ext1 in ['.tar', '.fastq', '.fasta', '.sam']:
         base = base1
         ext = ext1 + ext
     return base, ext
