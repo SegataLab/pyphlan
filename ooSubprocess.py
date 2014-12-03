@@ -26,6 +26,7 @@ class ooSubprocess:
             get_out_pipe=False,
             out_fn=None,
             in_pipe=None,
+            error_pipe=None,
             current_dir=None,
             verbose=True):
 
@@ -44,17 +45,32 @@ class ooSubprocess:
 
         if get_output:
             result = subprocess.check_output(
-                cmd,
-                cwd=current_dir,
-                stdin=in_pipe)
+                                                cmd,
+                                                cwd=current_dir,
+                                                stdin=in_pipe,
+                                                stderr=error_pipe)
         elif get_out_pipe:
-            result = subprocess.Popen(cmd, stdin=in_pipe, stdout=subprocess.PIPE, cwd=current_dir).stdout
+            result = subprocess.Popen(
+                                        cmd, 
+                                        stdin=in_pipe, 
+                                        stderr=error_pipe,
+                                        stdout=subprocess.PIPE, 
+                                        cwd=current_dir).stdout
         elif out_fn:
             ofile = open(out_fn, 'w') if out_fn else None
-            result = subprocess.check_call(cmd, stdin=in_pipe, stdout=ofile, cwd=current_dir)
+            result = subprocess.check_call(
+                                            cmd, 
+                                            stdin=in_pipe, 
+                                            stderr=error_pipe,
+                                            stdout=ofile, 
+                                            cwd=current_dir)
             ofile.close()
         else:
-            result = subprocess.check_call(cmd, stdin=in_pipe, cwd=current_dir)
+            result = subprocess.check_call(
+                                            cmd, 
+                                            stdin=in_pipe, 
+                                            stderr=error_pipe,
+                                            cwd=current_dir)
         return result
 
     def chain(
@@ -63,6 +79,7 @@ class ooSubprocess:
             args=[],
             stop=False,
             in_pipe=None,
+            error_pipe=None,
             get_output=False,
             get_out_pipe=False,
             out_fn=None,
@@ -102,34 +119,39 @@ class ooSubprocess:
             self.chain_cmds = []
             if get_output:
                 result = subprocess.check_output(
-                    cmd,
-                    stdin=in_pipe,
-                    cwd=current_dir)
+                                                    cmd,
+                                                    stdin=in_pipe,
+                                                    stderr=error_pipe,
+                                                    cwd=current_dir)
             elif get_out_pipe:
                 result = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stdin=in_pipe,
-                    cwd=current_dir).stdout
+                                            cmd,
+                                            stdin=in_pipe,
+                                            stderr=error_pipe,
+                                            stdout=subprocess.PIPE,
+                                            cwd=current_dir).stdout
             elif out_fn:
                 ofile = open(out_fn, 'w')
                 result = subprocess.check_call(
-                    cmd,
-                    stdout=ofile,
-                    stdin=in_pipe,
-                    cwd=current_dir)
+                                                cmd,
+                                                stdin=in_pipe,
+                                                stderr=error_pipe,
+                                                stdout=ofile,
+                                                cwd=current_dir)
                 ofile.close()
             else:
                 result = subprocess.check_call(
-                    cmd,
-                    stdin=in_pipe,
-                    cwd=current_dir)
+                                                cmd,
+                                                stdin=in_pipe,
+                                                stderr=error_pipe,
+                                                cwd=current_dir)
         else:
             result = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stdin=in_pipe,
-                cwd=current_dir).stdout
+                                        cmd,
+                                        stdin=in_pipe,
+                                        stderr=error_pipe,
+                                        stdout=subprocess.PIPE,
+                                        cwd=current_dir).stdout
         return result
 
     def ftmp(self, ifn):
