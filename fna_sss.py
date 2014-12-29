@@ -29,6 +29,7 @@ def read_params(args):
     parser.add_argument('--min_len', metavar='Minimum length of the genes to keep', default=None, type = int )
     parser.add_argument('--max_len', metavar='Maximum length of the genes to keep', default=None, type = int )
     parser.add_argument('--reverse', action='store_true', help="Invert selection\n")
+    parser.add_argument('-q', action='store_true', help="Fastq format\n")
 
     parser.add_argument('--ids', metavar='s', default="", type=str, 
         help="the list of entries to select (separated by ::: if given as string otherwise as \\n if a file is given)")
@@ -112,7 +113,7 @@ def sss( par ):
     #reads = reader( par['inp_f'], par['min_len'], par['max_len'] )
     cind = 0
     lmin,lmax = par['min_len'], par['max_len'] 
-    for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta"):
+    for r in SeqIO.parse( utils.openr(par['inp_f']), "fasta" if not par['q'] else "fastq"):
         if lmin and len(r.seq) < lmin:
             continue
         if lmax and len(r.seq) > lmax:
@@ -128,7 +129,7 @@ def sss( par ):
         if randomize:
             all_reads.append( r )
             continue
-        SeqIO.write(r, out_stream[cind], "fasta")
+        SeqIO.write(r, out_stream[cind], "fasta" if not par['q'] else "fastq")
         cind = (cind + 1) % nstreams
     
     """
