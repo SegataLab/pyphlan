@@ -150,7 +150,7 @@ def sss( par ):
         step = len(all_reads) / nstreams 
         for i,r in enumerate(all_reads):
             #out_stream[cind].write( str(r) )
-            SeqIO(r, out_stream[cind], "fasta" )
+            SeqIO.write(r, out_stream[cind], "fasta" if not par['q'] else "fastq" )
             if not i % step:
                 cind = (cind + 1) % nstreams
 
