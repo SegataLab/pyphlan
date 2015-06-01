@@ -26,6 +26,8 @@ def read_params( args ):
                     "[stdout if not present]")
     p.add_argument( '-n',  action='store_true', 
                     help = "Distances normalized with respect to the total branch length" )
+    p.add_argument( '-m',  action='store_true', 
+                    help = "Output a matrix" )
 
     return vars( p.parse_args() )
 
@@ -39,8 +41,14 @@ if __name__ == "__main__":
     #tbl = ppatree.tree.total_branch_length()-1.0 if args['n'] else 1.0
 
     with utils.openw( args['out_file'] ) as out:
-        for k1,v1 in dists.items():
-            for k2,v2 in v1.items():
-                if k1 < k2:
-                    out.write( "\t".join([k1,k2,str(v2/tbl)]) +"\n" )    
+        if args['m']:
+            keys = sorted(dists.keys())
+            out.write( "\t".join(["ID"]+keys) +"\n" )
+            for k1 in keys:
+                out.write( "\t".join([k1]+[str(dists[k1][k2]/tbl) for k2 in keys]) +"\n" )
+        else:
+            for k1,v1 in dists.items():
+                for k2,v2 in v1.items():
+                    if k1 < k2:
+                        out.write( "\t".join([k1,k2,str(v2/tbl)]) +"\n" )    
 
