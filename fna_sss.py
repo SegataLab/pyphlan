@@ -23,6 +23,9 @@ def read_params(args):
     
     parser.add_argument('--subsample', metavar='Random subsample probability', 
         default=None, type = float )
+    parser.add_argument('--subsample_nreads', default = None, 
+	help='Number-based subsample (follows randomization: e.g. --subsample_nreads 5e6)', type=int)
+
     parser.add_argument('--randomize', help='Randomize output order. Not very memory efficient right now!', action='store_true' )
     parser.add_argument('--split', metavar='nsplits', default=1, type = int )
     
@@ -34,7 +37,13 @@ def read_params(args):
     parser.add_argument('--ids', metavar='s', default="", type=str, 
         help="the list of entries to select (separated by ::: if given as string otherwise as \\n if a file is given)")
 
-    return vars(parser.parse_args())
+    pp = vars(parser.parse_args())
+    if pp['subsample_nreads'] and (not pp['randomize']):
+        print 'Warning: sampling the first %i reads without randomize.\
+        If you want to realistically sample reads add flag: --randomize' %pp['subsample_nreads']
+    
+    return pp
+
 
 class read:
     def __init__( self, n = None, seq = None ):
@@ -151,6 +160,10 @@ def sss( par ):
         for i,r in enumerate(all_reads):
             #out_stream[cind].write( str(r) )
             SeqIO.write(r, out_stream[cind], "fasta" if not par['q'] else "fastq" )
+
+            if i>=(par['subsample_nreads']-1):
+                break
+
             if not i % step:
                 cind = (cind + 1) % nstreams
 
