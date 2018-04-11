@@ -32,8 +32,13 @@ if __name__ == '__main__':
     samplename = None
 
     if par['inp_f']:
-        samplename = par['inp_f'][par['inp_f'].rfind('/')+1:]
-        samplename = samplename[:samplename.rfind('.')]
+        samplename = par['inp_f']
+
+        if '/' in samplename:
+            samplename = samplename[samplename.rfind('/')+1:]
+
+        if '.' in samplename:
+            samplename = samplename[:samplename.rfind('.')]
     else:
         samplename = 'stdin'
         samplename += '_fastq' if par['q'] else '_fasta'
@@ -46,6 +51,10 @@ if __name__ == '__main__':
                 lvec.append(l)
             else:
                 outf.write("\t".join([r.id, str(l)]) + "\n")
+
+        if not lvec:
+            sys.stderr.write('[e] no values found!\n')
+            sys.exit(0)
 
         if par['total']:
             outf.write(str(np.sum(lvec)) + "\n")
