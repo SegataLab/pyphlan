@@ -22,6 +22,8 @@ def read_params():
         help="Print only the sum of the length of all sequences\n")
     p.add_argument('-s', '--stat', action='store_true', default=False,
         help="Print only the statistics about the length of sequences\n")
+    p.add_argument('-g', '--gaps', action='store_true', default=False,
+        help="Print in addition to the length of the entries also the number of gaps\n")
 
     return vars(p.parse_args())
 
@@ -50,11 +52,15 @@ if __name__ == '__main__':
             if par['stat'] or par['total']:
                 lvec.append(l)
             else:
-                outf.write("\t".join([r.id, str(l)]) + "\n")
+                if par['gaps']:
+                    outf.write("\t".join([r.id, str(l), str(str(r.seq).count('-'))]) + "\n")
+                else:
+                    outf.write("\t".join([r.id, str(l)]) + "\n")
 
-        if not lvec:
-            sys.stderr.write('[e] no values found!\n')
-            sys.exit(0)
+        if par['stat'] or par['total']:
+            if not lvec:
+                sys.stderr.write('[e] no values found!\n')
+                sys.exit(0)
 
         if par['total']:
             outf.write(str(np.sum(lvec)) + "\n")
