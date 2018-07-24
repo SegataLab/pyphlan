@@ -24,13 +24,13 @@ uncl = "?"
 def partial_branch_length(clade, selective_targets):
     def _partial_branch_length_( clade, selective_targets ):
         if clade.is_terminal() and clade.name in selective_targets:
-            return [clade.branch_length]
+            return [clade.branch_length] if clade.branch_length else [0.0]
         if not any([c.name in selective_targets for c in clade.get_terminals()]):
             return [0.0]
         ret = [0.0]
         for c in clade.clades:
             ret += [partial_branch_length( c, selective_targets)]
-        ret += [clade.branch_length]
+        ret += [clade.branch_length] if clade.branch_length else [0.0]
         return ret
     return sum( _partial_branch_length_( clade,selective_targets  )  )
 
