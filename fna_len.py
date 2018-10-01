@@ -7,23 +7,21 @@ import argparse
 import utils
 from Bio import SeqIO
 import numpy as np
-import os
 
 
 def read_params():
     p = argparse.ArgumentParser(description='Display the length of each fasta entry')
     p.add_argument('inp_f', metavar='INPUT_FILE', nargs='?', default=None, type=str,
-        help="the input fna file [stdin if not present]")
+                   help="the input fna file [stdin if not present]")
     p.add_argument('out_f', metavar='OUTPUT_FILE', nargs='?', default=None, type=str,
-        help="the output txt file [stdout if not present]")
-    p.add_argument('-q', action='store_true',
-        help="set this for fastq")
+                   help="the output txt file [stdout if not present]")
+    p.add_argument('-q', action='store_true', help="set this for fastq")
     p.add_argument('-t', '--total', action='store_true', default=False,
-        help="Print only the sum of the length of all sequences\n")
+                   help="Print only the sum of the length of all sequences\n")
     p.add_argument('-s', '--stat', action='store_true', default=False,
-        help="Print only the statistics about the length of sequences\n")
+                   help="Print only the statistics about the length of sequences\n")
     p.add_argument('-g', '--gaps', action='store_true', default=False,
-        help="Print in addition to the length of the entries also the number of gaps\n")
+                   help="Print in addition to the length of the entries also the number of gaps\n")
 
     return vars(p.parse_args())
 
@@ -37,7 +35,7 @@ if __name__ == '__main__':
         samplename = par['inp_f']
 
         if '/' in samplename:
-            samplename = samplename[samplename.rfind('/')+1:]
+            samplename = samplename[samplename.rfind('/') + 1:]
 
         if '.' in samplename:
             samplename = samplename[:samplename.rfind('.')]
@@ -47,19 +45,19 @@ if __name__ == '__main__':
 
     with utils.openw(par['out_f']) as outf:
         for r in SeqIO.parse(utils.openr(par['inp_f']), "fastq" if par['q'] else "fasta"):
-            l = len(r.seq)
+            lenn = len(r.seq)
 
             if par['stat'] or par['total']:
-                lvec.append(l)
+                lvec.append(lenn)
             else:
                 if par['gaps']:
-                    outf.write("\t".join([r.id, str(l), str(str(r.seq).count('-'))]) + "\n")
+                    outf.write("\t".join([r.id, str(lenn), str(str(r.seq).count('-'))]) + "\n")
                 else:
-                    outf.write("\t".join([r.id, str(l)]) + "\n")
+                    outf.write("\t".join([r.id, str(lenn)]) + "\n")
 
         if par['stat'] or par['total']:
             if not lvec:
-                sys.stderr.write('[e] no values found!\n')
+                sys.stderr.write('[e] "{}" no values found!\n'.format(samplename))
                 sys.exit(0)
 
         if par['total']:
